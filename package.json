@@ -14,6 +14,7 @@
     "test:mp-weixin": "cross-env UNI_PLATFORM=mp-weixin jest -i"
   },
   "dependencies": {
+    "@babel/runtime": "^7.21.0",
     "@dcloudio/uni-app": "^2.0.2-3070320230222001",
     "@dcloudio/uni-app-plus": "^2.0.2-3070320230222001",
     "@dcloudio/uni-h5": "^2.0.2-3070320230222001",
@@ -64,6 +65,8 @@
     "mini-types": "*",
     "miniprogram-api-typings": "*",
     "postcss-comment": "^2.0.0",
+    "sass": "^1.58.3",
+    "sass-loader": "^13.2.0",
     "typescript": "~4.5.5",
     "vue-template-compiler": ">= 2.6.14 < 2.7"
   },

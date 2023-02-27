@@ -1,7 +1,8 @@
 <template>
-  <view>
+  <view class="container">
     <!-- pages/activity/index.wxml -->
     <!-- <text>pages/activity/index.wxml</text> -->
+    <back-button></back-button>
     <div>{{ title }}</div>
     <rich-text :nodes="description"></rich-text>
     <div class="good-container">
@@ -18,8 +19,10 @@
 </template>
 
 <script>
+import backButton from '@/components/backButton.vue';
 // pages/activity/index.js
 export default {
+  components: { backButton },
   data() {
     return {
       title: '',
@@ -91,6 +94,9 @@ export default {
 </script>
 <style scoped>
 /* pages/activity/index.wxss */
+.container {
+  margin-top: 50px;
+}
 .good-container {
   display: flex;
   padding: 16rpx;
