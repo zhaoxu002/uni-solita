@@ -1,14 +1,26 @@
 <template>
-  <div class="container">
+  <div class="container" @click="handleBack">
     <uni-icons type="back" size="30"></uni-icons>
   </div>
 </template>
 
 <script>
-import uniIcons from './uni-icons/uni-icons.vue'
 export default {
-  components: { uniIcons },
-
+  data() {
+    return {
+      isPageStackNull: false
+    }
+  },
+  onLoad() {
+    if (getCurrentPages().length === 1) {
+      this.isPageStackNull = true
+    }
+  },
+  methods: {
+    handleBack() {
+      uni.navigateBack()
+    }
+  }
 }
 </script>
 
