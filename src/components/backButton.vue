@@ -1,6 +1,6 @@
 <template>
-  <div class="container" @click="handleBack">
-    <uni-icons type="back" size="30"></uni-icons>
+  <div class="backButton" @click="handleBack">
+    <uni-icons type="back" size="16"></uni-icons>
   </div>
 </template>
 
@@ -25,7 +25,7 @@ export default {
 </script>
 
 <style scoped>
-.container {
+.backButton {
   position: fixed;
   top: 50px;
   left: 6px;
@@ -38,6 +38,6 @@ export default {
   text-align: center;
   line-height: 32px;
   font-size: 16px;
-  color: #ddd;
+  color: #333;
 }
 </style>

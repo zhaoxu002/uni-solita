@@ -11,6 +11,12 @@
       "style": {
         "navigationBarTitleText": "接龙详情"
       }
+    },
+    {
+      "path": "pages/person/index",
+      "style": {
+        "navigationBarTitleText": "我参与的"
+      }
     }
   ],
   "globalStyle": {
