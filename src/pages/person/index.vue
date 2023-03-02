@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <back-button />
+    <!-- <back-button /> -->
 
     <div class="header">标题</div>
 

@@ -2,7 +2,7 @@
   <view class="container">
     <!-- pages/activity/index.wxml -->
     <!-- <text>pages/activity/index.wxml</text> -->
-    <back-button />
+    <!-- <back-button /> -->
     <div>{{ title }}</div>
     <button open-type="share">转发</button>
     <rich-text :nodes="description"></rich-text>
