@@ -17,6 +17,12 @@
       "style": {
         "navigationBarTitleText": "我参与的"
       }
+    },
+    {
+      "path": "pages/order/index",
+      "style": {
+        "navigationBarTitleText": "确认订单"
+      }
     }
   ],
   "globalStyle": {

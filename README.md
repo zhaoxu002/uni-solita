@@ -89,6 +89,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### 电话号码input
 
+### 用户昵称获取
+
 ### 购物袋信息
 - 商品图片
 - 商品名称
@@ -100,6 +102,9 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### 确认下单按钮
 点击确认下单  
+- 订单表写入
+- 订单关联表写入
+- 商品表库存扣减
 
 
 ***
@@ -123,6 +128,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 - 备注
 - 订单号
 - **未截至时取消订单**
+  - 订单表改变状态
+  - 商品库存加回来
 
 
 # CMS功能

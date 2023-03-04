@@ -59,7 +59,10 @@
 
     <div v-if="selected.selectedPrice > 0">
       <div @click="handleShowSelected">总价：{{ selected.selectedPrice }}</div>
+
+      <button @click="handleConfirm">下单</button>
     </div>
+
 
     <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
       <div>
@@ -91,9 +94,6 @@ export default {
 
       pageContainerShow: false,
       goodDetail: null,
-      // currentCartNumber: 1,
-
-      cart: [],
     };
   },
 
@@ -111,6 +111,9 @@ export default {
         selectedPrice,
       };
     },
+    cart() {
+      return this.$store.state.cart
+    } 
   },
   /**
    * 生命周期函数--监听页面加载
@@ -157,7 +160,9 @@ export default {
   /**
    * 生命周期函数--监听页面卸载
    */
-  onUnload() {},
+  onUnload() {
+    // this.$store.commit('updateCart', [])
+  },
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
@@ -200,6 +205,37 @@ export default {
     handleShowSelected() {
       this.$refs.selectedPopup.open("bottom");
     },
+
+    handleConfirm() {
+      const goodList = this.selected.selectedGoods.map(item => {
+            return {
+              id: item._id,
+              amount: item.amount
+            }
+          })
+
+      this.$store.commit('updateCart', {
+        activityId: this.activityId,
+        goods: goodList
+      })
+      // wx.cloud.callFunction({
+      //   name: 'createOrder',
+      //   data: {
+      //     activityId: this.activityId,
+      //     locationId: '93e4b6a063f81f4901c719636aa37f0b',
+      //     goodList: this.selected.selectedGoods.map(item => {
+      //       return {
+      //         id: item._id,
+      //         amount: item.amount
+      //       }
+      //     }),
+      //     totalPrice: this.selected.selectedPrice,
+      //     phone: 13122020795,
+      //     comment: '评论试试'
+      //   }
+      // })
+    }
+
   },
 };
 </script>
