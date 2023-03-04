@@ -16,6 +16,7 @@ exports.main = async (event, context) => {
     event;
   const result = await db.runTransaction(async (transaction) => {
     try {
+      // 写 订单表
       const orderRes = await transaction.collection("order").add({
         data: {
           source: activityId,
@@ -28,6 +29,8 @@ exports.main = async (event, context) => {
         },
       });
       const orderId = orderRes._id;
+
+      // 写 订单关联表
       const detailResList = goodList.map(async (record) => {
         const { id, amount } = record;
         const res = await transaction.collection("orderDetail").add({
@@ -40,6 +43,8 @@ exports.main = async (event, context) => {
         });
         return res;
       });
+
+      // 写 商品表
 
       return {
         success: true,
