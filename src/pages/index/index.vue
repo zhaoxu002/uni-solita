@@ -1,10 +1,10 @@
 <template>
   <div>
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
-		<button @click="handleAccount">my</button>
+    <button @click="handleAccount">my</button>
     <view class="container">
       <view class="activity" v-for="(item, index) in activities" :key="index">
-				<image class="activity-image" :src="item.headImage" mode="aspectFill"/>
+        <image class="activity-image" :src="item.headImage" mode="aspectFill" />
         {{ item.title }}
 
         <button @tap="handleCheckDetail(item._id)">点击查看</button>
@@ -14,12 +14,12 @@
 </template>
 
 <script>
-import Vue from "vue";
+import Vue from 'vue';
 
 export default Vue.extend({
   data() {
     return {
-      title: "Hello",
+      title: 'Hello',
       activities: [],
     };
   },
@@ -30,7 +30,7 @@ export default Vue.extend({
     handleGetActivities() {
       wx.cloud
         .callFunction({
-          name: "getActivities",
+          name: 'getActivities',
         })
         .then((res) => {
           console.log(res);
@@ -54,15 +54,15 @@ export default Vue.extend({
       //         console.log(res.result.data);
       //     });
       wx.navigateTo({
-        url: "/pages/activity/index?id=" + id,
+        url: '/pages/activity/index?id=' + id,
       });
     },
 
-		handleAccount() {
-			wx.navigateTo({
-        url: "/pages/person/index"
+    handleAccount() {
+      wx.navigateTo({
+        url: '/pages/person/index',
       });
-		}
+    },
   },
 });
 </script>
@@ -109,7 +109,7 @@ export default Vue.extend({
   color: #8f8f94;
 }
 .activity-image {
-	width: 80px;
-	height: 80px;
+  width: 80px;
+  height: 80px;
 }
 </style>
