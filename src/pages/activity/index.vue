@@ -81,6 +81,7 @@
 <script>
 // import { add, multiply } from 'mathjs'
 import backButton from "@/components/backButton.vue";
+import store from '@/store/index'
 // pages/activity/index.js
 export default {
   components: { backButton },
@@ -90,7 +91,7 @@ export default {
       title: "",
       description: "",
       goods: [],
-      locationList: [],
+      // locationList: [],
 
       pageContainerShow: false,
       goodDetail: null,
@@ -103,7 +104,6 @@ export default {
       const selectedPrice = selectedGoods
         .reduce((acc, cur) => {
           return acc + cur.price * cur.amount;
-          // return add(acc, multiply(cur.price, cur.amount))
         }, 0)
         .toFixed(2);
       return {
@@ -112,7 +112,7 @@ export default {
       };
     },
     cart() {
-      return this.$store.state.cart
+      return store.state.cart
     } 
   },
   /**
@@ -142,7 +142,9 @@ export default {
             amount: 0,
           };
         });
-        this.locationList = locationList;
+        // this.locationList = locationList;
+        store.commit('updateLocationList', locationList)
+
       });
   },
   /**
@@ -207,16 +209,14 @@ export default {
     },
 
     handleConfirm() {
-      const goodList = this.selected.selectedGoods.map(item => {
-            return {
-              id: item._id,
-              amount: item.amount
-            }
-          })
-
-      this.$store.commit('updateCart', {
+      
+      store.commit('updateCart', {
         activityId: this.activityId,
-        goods: goodList
+        goods: this.selected.selectedGoods
+      })
+
+      wx.navigateTo({
+        url: "/pages/order/index?id=" + this.activityId,
       })
       // wx.cloud.callFunction({
       //   name: 'createOrder',

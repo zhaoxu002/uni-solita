@@ -1,11 +1,9 @@
 import Vue from "vue";
 import App from "./App.vue";
 import request from "./utils/request";
-import store from "./store";
 
 Vue.config.productionTip = false;
 Vue.prototype.$request = request;
-Vue.prototype.$store = store;
 
 function isPromise(obj: any) {
   return (
@@ -37,8 +35,5 @@ const app = new (
     ? App
     : Vue.extend(Object.assign({ mpType: "app" }, App))
 )();
-// const app = new Vue({
-// 	store,
-// 	...App
-// })
+
 app.$mount();

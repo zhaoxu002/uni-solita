@@ -11,17 +11,29 @@ interface Cart {
   }[]
 }
 
+interface Location {
+  location: string;
+  title: string;
+  _id: string;
+}
+
 const store = new Store<{
-  cart?: Cart
+  cart?: Cart,
+  locationList: Location[]
 }>({
   state() {
     return {
-      cart: undefined
+      cart: undefined,
+      locationList: []
     }
   },
   mutations: {
     updateCart(state, payload: Cart) {
       state.cart = payload
+    },
+
+    updateLocationList(state, payload: Location[]) {
+      state.locationList = payload
     }
   }
 })
