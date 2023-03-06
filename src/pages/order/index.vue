@@ -1,29 +1,50 @@
 <template>
   <div class="container">
     <div class="card">
-      <uni-forms :modelValue="formData">
+      <uni-forms :modelValue="formData" ref="form">
         <uni-forms-item label="提货点" name="locationId">
-          <uni-data-select :localdata="locationList"></uni-data-select>
+          <uni-data-select :localdata="locationList" required></uni-data-select>
         </uni-forms-item>
 
-        <uni-forms-item label="电话" name="phone">
+        <uni-forms-item label="电话" name="phone" required>
           <uni-easyinput type="number"> </uni-easyinput>
         </uni-forms-item>
 
         <uni-forms-item label="备注">
           <uni-easyinput></uni-easyinput>
         </uni-forms-item>
+
+        <uni-forms-item label="昵称" required>
+          <uni-easyinput type="nickname" name="nickname" />
+        </uni-forms-item>
       </uni-forms>
-      <div>选择提货点</div>
-      <div>电话号码</div>
+      <!-- <div>选择提货点</div>
+      <div>电话号码</div> -->
     </div>
 
-    <div class="card">购物车</div>
+    <div class="card">
+      <div v-for="item of cart.goods" :key="item._id" class="item">
+        <img :src="item.images[0]" class="image" mode="aspectFill" />
+        <div>
+          {{ item.name }}
+        </div>
+        
+        <div>
+          {{ item.amount }}
+        </div>
 
-    <div class="card">接龙备注</div>
+        <div>
+          {{ item.price }}
+        </div>
+      </div>
+
+      <div>{{totalPrice}}</div>
+    </div>
+
+    <!-- <div class="card">接龙备注</div> -->
 
     <div class="bottom-fixed">
-      <button>提交接龙</button>
+      <button @click="handleConfirm">提交接龙</button>
     </div>
   </div>
 </template>
@@ -40,6 +61,11 @@ export default {
   data() {
     return {
       formData: {},
+      required: [
+        {
+          required: true,
+        },
+      ],
     };
   },
 
@@ -55,6 +81,21 @@ export default {
     cart() {
       return store.state.cart;
     },
+    totalPrice() {
+      return store.state.cart.goods
+        .reduce((acc, cur) => {
+          return acc + cur.price * cur.amount;
+        }, 0)
+        .toFixed(2);
+    },
+  },
+
+  methods: {
+    handleConfirm() {
+      this.$refs.form.validate().then(() => {
+        console.log("success");
+      });
+    },
   },
 };
 </script>
@@ -62,5 +103,12 @@ export default {
 <style lang="scss">
 .container {
   padding: 16px;
+}
+.item {
+  display: flex;
+}
+.image {
+  width: 80px;
+  height: 80px;
 }
 </style>

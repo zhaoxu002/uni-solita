@@ -1,11 +1,15 @@
 <template>
   <view class="container">
-    <!-- pages/activity/index.wxml -->
-    <!-- <text>pages/activity/index.wxml</text> -->
-    <!-- <back-button /> -->
-    <div>{{ title }}</div>
-    <button open-type="share">转发</button>
-    <rich-text :nodes="description"></rich-text>
+    <div class="info-container">
+      <div>{{ title }}</div>
+      <button open-type="share">转发</button>
+      <mp-html
+        class="rich-text"
+        :content="description"
+        container-style="word-break:break-all;white-space:pre-wrap;"
+      ></mp-html>
+    </div>
+
     <div class="good-container">
       <div class="good" v-for="item of goods" :key="item._id">
         <img
@@ -57,12 +61,15 @@
       </div>
     </uni-popup>
 
-    <div v-if="selected.selectedPrice > 0">
-      <div @click="handleShowSelected">总价：{{ selected.selectedPrice }}</div>
+    <div v-if="selected.selectedPrice > 0" class="bottom-bar">
+      <div class="bar-content">
+        <div @click="handleShowSelected">
+          总价：{{ selected.selectedPrice }}
+        </div>
 
-      <button @click="handleConfirm">下单</button>
+        <button @click="handleConfirm">下单</button>
+      </div>
     </div>
-
 
     <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
       <div>
@@ -79,10 +86,10 @@
 </template>
 
 <script>
-// import { add, multiply } from 'mathjs'
 import backButton from "@/components/backButton.vue";
-import store from '@/store/index'
-// pages/activity/index.js
+import store from "@/store/index";
+import formatImage from "@/utils/formatHTMLImage";
+
 export default {
   components: { backButton },
   data() {
@@ -112,8 +119,8 @@ export default {
       };
     },
     cart() {
-      return store.state.cart
-    } 
+      return store.state.cart;
+    },
   },
   /**
    * 生命周期函数--监听页面加载
@@ -134,7 +141,7 @@ export default {
           res.result.data;
 
         this.activityId = id;
-        this.description = description;
+        this.description = formatImage(description);
         this.title = title;
         this.goods = goods.map((item) => {
           return {
@@ -143,8 +150,7 @@ export default {
           };
         });
         // this.locationList = locationList;
-        store.commit('updateLocationList', locationList)
-
+        store.commit("updateLocationList", locationList);
       });
   },
   /**
@@ -209,15 +215,14 @@ export default {
     },
 
     handleConfirm() {
-      
-      store.commit('updateCart', {
+      store.commit("updateCart", {
         activityId: this.activityId,
-        goods: this.selected.selectedGoods
-      })
+        goods: this.selected.selectedGoods,
+      });
 
       wx.navigateTo({
         url: "/pages/order/index?id=" + this.activityId,
-      })
+      });
       // wx.cloud.callFunction({
       //   name: 'createOrder',
       //   data: {
@@ -234,8 +239,7 @@ export default {
       //     comment: '评论试试'
       //   }
       // })
-    }
-
+    },
   },
 };
 </script>
@@ -243,6 +247,16 @@ export default {
 /* pages/activity/index.wxss */
 .container {
   margin-top: 88px;
+}
+.info-container {
+  padding: 16rpx;
+}
+
+.rich-text {
+  width: 100%;
+}
+[alt] {
+  max-width: 100%;
 }
 
 .good-container {
@@ -283,9 +297,21 @@ export default {
   .name {
     font-weight: bold;
   }
+}
+.bottom-bar {
+  /* padding-bottom: ; */
+  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
 
-  .price {
-    color: red;
+  .bar-content {
+    height: 60px;
+    display: flex;
   }
+}
+.price {
+  color: $uni-color-primary;
 }
 </style>

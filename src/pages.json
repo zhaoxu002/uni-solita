@@ -26,9 +26,9 @@
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "black",
+    "navigationBarTextStyle": "white",
     "navigationBarTitleText": "uni-app",
-    "navigationBarBackgroundColor": "#F8F8F8",
-    "backgroundColor": "#f7f9fa"
+    "navigationBarBackgroundColor": "#f2828d",
+    "backgroundColor": "#eee7df"
   }
 }
