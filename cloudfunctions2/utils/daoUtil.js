@@ -3,15 +3,23 @@ const getOne = async (collection, _id) => {
   return result.data;
 };
 
+const getOneBySearch = async (collection, query) => {
+  let arr = await getList(collection, query);
+  return arr ? arr[0] : [];
+};
+
 const getList = async (collection, query) => {
-  const result = await collection.where(query).orderBy('createTime', 'desc').get();
+  const result = await collection
+    .where(query)
+    .orderBy("createTime", "desc")
+    .get();
   return result.data;
 };
 
 const getListByPage = async (collection, query, curPage, limit) => {
   const result = await collection
     .where(query)
-    .orderBy('createTime', 'desc')
+    .orderBy("createTime", "desc")
     .skip(curPage * limit)
     .limit(limit)
     .get();
@@ -36,18 +44,27 @@ const deleteList = async (collection, query) => {
   }
 };
 
-const removeOne = async (collection, _id, statusCode) => {
+const removeOne = async (collection, _id) => {
   try {
-    await collection.doc(_id).update({ status: statusCode });
+    await collection.doc(_id).update({ data: { isDelete: true } });
     return true;
   } catch (error) {
     throw error;
   }
 };
 
-const removeList = async (collection, query, statusCode) => {
+const removeOneBySearch = async (collection, query) => {
   try {
-    await collection.where(query).update({ status: statusCode });
+    await collection.where(query).update({ data: { isDelete: true } });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const removeList = async (collection, query) => {
+  try {
+    await collection.where(query).update({ data: { isDelete: true } });
     return true;
   } catch (error) {
     throw error;
@@ -72,14 +89,27 @@ const updateOne = async (collection, _id, data) => {
   }
 };
 
+const updateBySearch = async (collection, query, data) => {
+  try {
+    await collection.where(query).update({ data });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getOne,
+  getOneBySearch,
   getList,
   getListByPage,
   deleteOne,
   deleteList,
   removeOne,
+  removeOneBySearch,
   removeList,
   createOne,
   updateOne,
+  updateBySearch,
 };
+

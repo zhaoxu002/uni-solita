@@ -3,13 +3,15 @@
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
     <button @click="handleAccount">my</button>
     <view class="container">
-      <view
-        class="activity"
-        v-for="(item, index) in activities"
-        :key="index"
-        @tap="handleCheckDetail(item._id)"
-      >
-        <image class="activity-image" :src="item.headImage" mode="aspectFill" />
+      <view class="activity" v-for="(item, index) in activities" :key="index">
+        <image
+          class="activity-image"
+          v-for="pic in item.headImages"
+          :src="pic"
+          :key="pic"
+          mode="aspectFill"
+          @tap="handleCheckDetail(item._id)"
+        />
         {{ item.title }}
       </view>
     </view>
@@ -17,12 +19,12 @@
 </template>
 
 <script>
-import Vue from 'vue';
+import Vue from "vue";
 
 export default Vue.extend({
   data() {
     return {
-      title: 'Hello',
+      title: "Hello",
       activities: [],
     };
   },
@@ -31,15 +33,27 @@ export default Vue.extend({
   },
   methods: {
     handleGetActivities() {
+      // wx.cloud
+      //   .callFunction({
+      //     name: "getActivities",
+      //   })
+      //   .then((res) => {
+      //     console.log(res);
+      //     // this.setData({
+      //     //     activities: res.result.data
+      //     // });
+      //     this.activities = res.result.data;
+      //   });
       wx.cloud
         .callFunction({
-          name: 'getActivities',
+          name: "purchase",
+          data: {
+            method: "getListByPage",
+            query: {},
+            pageQuery: { curPage: 1, limit: 10 },
+          },
         })
         .then((res) => {
-          console.log(res);
-          // this.setData({
-          //     activities: res.result.data
-          // });
           this.activities = res.result.data;
         });
     },
@@ -57,7 +71,7 @@ export default Vue.extend({
       //         console.log(res.result.data);
       //     });
       wx.navigateTo({
-        url: '/pages/activity/index?id=' + id,
+        url: "/pages/activity/index?id=" + id,
       });
     },
 

@@ -15,7 +15,7 @@
         <img
           class="good-img"
           mode="aspectFill"
-          :src="item.images[0]"
+          :src="item.defaultImg"
           alt=""
           @click="handleCheckDetail(item)"
         />
@@ -40,7 +40,7 @@
     >
       <div class="good-detail" v-if="goodDetail">
         <div class="flex">
-          <image :src="goodDetail.images[0]" class="image" mode="aspectFill" />
+          <image :src="goodDetail.defaultImg" class="image" mode="aspectFill" />
           <div>
             <div class="name">{{ goodDetail.name }}</div>
             <div class="price">{{ goodDetail.price }}</div>
@@ -140,8 +140,8 @@ export default {
       .callFunction({
         name: "purchase",
         data: {
-          method: 'getOne',
-          _id: id
+          method: "getOne",
+          _id: id,
         },
       })
       .then((res) => {
