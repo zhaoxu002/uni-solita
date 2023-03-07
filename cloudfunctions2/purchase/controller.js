@@ -12,6 +12,7 @@ const db = cloud.database();
 const _ = db.command;
 const collection = db.collection('purchase');
 const itemCollection = db.collection('item');
+const locationCollection = db.collection('location')
 
 // TODO 获取团购的购买用户(数量)
 // TODO 分页添加总数量
@@ -19,9 +20,11 @@ const searchPurchaseById = async (event, context) => {
   const { _id } = event;
   try {
     const purchase = await daoUtils.getOne(collection, _id);
-    const { itemIds } = purchase;
+    const { itemIds, locationIds } = purchase;
     const items = await daoUtils.getList(itemCollection, { _id: _.in(itemIds) });
+    const locations = await daoUtils.getList(locationCollection, { _id: _.in(locationIds)})
     purchase.items = items;
+    purchase.locations = locations;
     return createSuccessResponse(purchase);
   } catch (error) {
     return createErrorResponse(error);

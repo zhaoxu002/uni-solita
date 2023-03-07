@@ -107,7 +107,6 @@ export default {
       title: "",
       description: "",
       goods: [],
-      // locationList: [],
 
       pageContainerShow: false,
       goodDetail: null,
@@ -139,28 +138,32 @@ export default {
 
     wx.cloud
       .callFunction({
-        name: "getActivityDetail",
+        name: "purchase",
         data: {
-          id,
+          method: 'getOne',
+          _id: id
         },
       })
       .then((res) => {
         console.log(res.result.data);
-        const { description, title, goods, locationList, status, endTime } =
+        const { description, title, items, locations, status, endTime } =
           res.result.data;
 
         this.activityId = id;
         this.description = formatImage(description);
         this.title = title;
-        this.goods = goods.map((item) => {
+        this.goods = items.map((item) => {
           return {
             ...item,
             amount: 0,
           };
         });
-        // this.locationList = locationList;
-        store.commit("updateLocationList", locationList);
+        store.commit("updateLocationList", locations);
       });
+
+    wx.cloud.callFunction({
+
+    })
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
