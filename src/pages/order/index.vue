@@ -2,7 +2,7 @@
   <div class="container">
     <div class="card">
       <uni-forms :modelValue="formData" ref="form">
-        <uni-forms-item label="提货点" name="locationId">
+        <uni-forms-item label="提货点" name="locationId" required>
           <uni-data-select :localdata="locationList" required></uni-data-select>
         </uni-forms-item>
 
@@ -18,8 +18,6 @@
           <uni-easyinput type="nickname" name="nickname" />
         </uni-forms-item>
       </uni-forms>
-      <!-- <div>选择提货点</div>
-      <div>电话号码</div> -->
     </div>
 
     <div class="card">
@@ -28,7 +26,7 @@
         <div>
           {{ item.name }}
         </div>
-        
+
         <div>
           {{ item.amount }}
         </div>
@@ -38,10 +36,8 @@
         </div>
       </div>
 
-      <div>{{totalPrice}}</div>
+      <div>{{ totalPrice }}</div>
     </div>
-
-    <!-- <div class="card">接龙备注</div> -->
 
     <div class="bottom-fixed">
       <button @click="handleConfirm">提交接龙</button>

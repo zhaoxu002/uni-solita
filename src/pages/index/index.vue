@@ -1,13 +1,16 @@
 <template>
   <div>
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
-		<button @click="handleAccount">my</button>
+    <button @click="handleAccount">my</button>
     <view class="container">
-      <view class="activity" v-for="(item, index) in activities" :key="index">
-				<image class="activity-image" :src="item.headImage" mode="aspectFill"/>
+      <view
+        class="activity"
+        v-for="(item, index) in activities"
+        :key="index"
+        @tap="handleCheckDetail(item._id)"
+      >
+        <image class="activity-image" :src="item.headImage" mode="aspectFill" />
         {{ item.title }}
-
-        <button @tap="handleCheckDetail(item._id)">点击查看</button>
       </view>
     </view>
   </div>
@@ -58,23 +61,23 @@ export default Vue.extend({
       });
     },
 
-		handleAccount() {
-			wx.navigateTo({
-        url: "/pages/person/index"
+    handleAccount() {
+      wx.navigateTo({
+        url: "/pages/person/index",
       });
-		}
+    },
   },
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .page-bg {
   width: 100%;
   height: 30vh;
 }
 
 .container {
-  background: #f7f9fa;
+  background: $uni-bg-color-grey;
   padding: 16px;
   min-height: 100vh;
 }
@@ -84,6 +87,14 @@ export default Vue.extend({
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  display: flex;
+
+  .activity-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
 }
 
 .content {
@@ -107,9 +118,5 @@ export default Vue.extend({
 .title {
   font-size: 36rpx;
   color: #8f8f94;
-}
-.activity-image {
-	width: 80px;
-	height: 80px;
 }
 </style>

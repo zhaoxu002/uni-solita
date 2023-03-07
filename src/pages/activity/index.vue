@@ -67,16 +67,25 @@
           总价：{{ selected.selectedPrice }}
         </div>
 
-        <button @click="handleConfirm">下单</button>
+        <button class="confirm" type="primary" @click="handleConfirm">
+          下单
+        </button>
       </div>
     </div>
 
     <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
-      <div>
-        <div v-for="item of selected.selectedGoods" :key="item._id">
-          <div>{{ item.name }}</div>
-          <div>{{ item.price }}</div>
-          <div>{{ item.amount }}</div>
+      <div class="popup-container">
+        <div
+          class="selected-item"
+          v-for="item of selected.selectedGoods"
+          :key="item._id"
+        >
+          <image mode="aspectFit" class="selected-img" :src="item.images[0]" />
+          <div>
+            <div>{{ item.name }}</div>
+            <div>{{ item.price }}</div>
+            <div>{{ item.amount }}</div>
+          </div>
         </div>
 
         <div>总价：{{ selected.selectedPrice }}</div>
@@ -244,9 +253,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-/* pages/activity/index.wxss */
+
 .container {
-  margin-top: 88px;
+  /* margin-top: 88px; */
+  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
 }
 .info-container {
   padding: 16rpx;
@@ -305,10 +316,31 @@ export default {
   position: fixed;
   bottom: 0;
   width: 100vw;
+  background: #fff;
 
   .bar-content {
-    height: 60px;
+    height: 44px;
     display: flex;
+    align-items: center;
+    z-index: 10000;
+  }
+
+  .confirm {
+    height: 40px;
+    border-radius: 20px;
+  }
+}
+.popup-container {
+  padding: 16px;
+}
+.selected-item {
+  display: flex;
+
+  .selected-img {
+    width: 60px;
+    height: 60px;
+    margin-right: 8px;
+    border-radius: 4px;
   }
 }
 .price {
