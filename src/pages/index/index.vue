@@ -17,12 +17,12 @@
 </template>
 
 <script>
-import Vue from "vue";
+import Vue from 'vue';
 
 export default Vue.extend({
   data() {
     return {
-      title: "Hello",
+      title: 'Hello',
       activities: [],
     };
   },
@@ -33,7 +33,7 @@ export default Vue.extend({
     handleGetActivities() {
       wx.cloud
         .callFunction({
-          name: "getActivities",
+          name: 'getActivities',
         })
         .then((res) => {
           console.log(res);
@@ -57,7 +57,7 @@ export default Vue.extend({
       //         console.log(res.result.data);
       //     });
       wx.navigateTo({
-        url: "/pages/activity/index?id=" + id,
+        url: '/pages/activity/index?id=' + id,
       });
     },
 

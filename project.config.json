@@ -1,6 +1,6 @@
 {
   "miniprogramRoot": "dist/build/mp-weixin/",
-  "cloudfunctionRoot": "cloudfunctions/",
+  "cloudfunctionRoot": "cloudfunctions2/",
   "setting": {
     "urlCheck": true,
     "es6": false,
@@ -11,7 +11,8 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    }
+    },
+    "condition": false
   },
   "appid": "wx2770c1edbf44b86d",
   "projectname": "wechat-solita",
