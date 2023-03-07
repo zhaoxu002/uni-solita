@@ -15,7 +15,7 @@
         <img
           class="good-img"
           mode="aspectFill"
-          :src="item.images[0]"
+          :src="item.defaultImg"
           alt=""
           @click="handleCheckDetail(item)"
         />
@@ -40,7 +40,7 @@
     >
       <div class="good-detail" v-if="goodDetail">
         <div class="flex">
-          <image :src="goodDetail.images[0]" class="image" mode="aspectFill" />
+          <image :src="goodDetail.defaultImg" class="image" mode="aspectFill" />
           <div>
             <div class="name">{{ goodDetail.name }}</div>
             <div class="price">{{ goodDetail.price }}</div>
@@ -98,7 +98,7 @@ export default {
       title: "",
       description: "",
       goods: [],
-      // locationList: [],
+      // locationIds: [],
 
       pageContainerShow: false,
       goodDetail: null,
@@ -130,27 +130,36 @@ export default {
 
     wx.cloud
       .callFunction({
-        name: "getActivityDetail",
+        name: "purchase",
         data: {
-          id,
+          method: "getOne",
+          _id: id,
         },
       })
       .then((res) => {
         console.log(res.result.data);
-        const { description, title, goods, locationList, status, endTime } =
-          res.result.data;
+        const {
+          title,
+          startTime,
+          endTime,
+          headImages,
+          description,
+          locationIds,
+          items,
+          status,
+        } = res.result.data;
 
         this.activityId = id;
         this.description = formatImage(description);
         this.title = title;
-        this.goods = goods.map((item) => {
+        this.goods = items.map((item) => {
           return {
             ...item,
             amount: 0,
           };
         });
-        // this.locationList = locationList;
-        store.commit("updateLocationList", locationList);
+        // this.locationIds = locationIds;
+        store.commit("updateLocationList", locationIds);
       });
   },
   /**
