@@ -1,7 +1,7 @@
 const cloud = require('wx-server-sdk');
 const daoUtils = require('./utils/daoUtil');
 const Item = require('./itemVo');
-const { createSuccessResponse, createErrorResponse } = require('../utils/responseUtil');
+const { createSuccessResponse, createErrorResponse } = require('./utils/responseUtil');
 
 cloud.init({
   env: 'test-6guvdos0d2e13c77',

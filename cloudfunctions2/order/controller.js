@@ -2,7 +2,7 @@ const cloud = require('wx-server-sdk');
 const { nanoid } = require('nanoid');
 const daoUtils = require('./utils/daoUtil');
 const { Order, OrderItem } = require('./orderVo');
-const { createSuccessResponse, createErrorResponse } = require('../utils/responseUtil');
+const { createSuccessResponse, createErrorResponse } = require('./utils/responseUtil');
 
 cloud.init({
   env: 'test-6guvdos0d2e13c77',
