@@ -49,11 +49,16 @@ const searchOrderByUserOpenIdAndPage = async (event, context) => {
     if (orders && orders.length) {
       await Promise.all(
         orders.map(async (order) => {
-          const { sn } = order;
+          const { sn, purchaseId } = order;
           const orderItems = await daoUtils.getList(orderItemCollection, {
             orderSn: sn,
           });
+          const purchase = await daoUtils.getOne(
+            purchaseCollection,
+            purchaseId
+          );
           order.items = orderItems;
+          order.purchaseTitle = purchase.title;
         })
       );
     }
@@ -177,7 +182,12 @@ const createOrder = async (event, context) => {
     }
     orderVo.totalAmount = totalAmount;
     const orderItemVos = items.map((item) => {
-      return new OrderItem(sn, itemIdMapQuantity.get(item._id), item);
+      return new OrderItem(
+        sn,
+        itemIdMapQuantity.get(item._id),
+        { ...item, userName: data.userName },
+        purchase._id
+      );
     });
     // console.log('orderItemVos==>', orderItemVos);
     await db.runTransaction(async (transaction) => {

@@ -7,7 +7,7 @@
     <div class="activity-list">
       <div class="card" v-for="item of list" :key="item._id">
         <div class="name">
-          {{ item._id }}
+          {{ item.purchaseTitle }}
         </div>
 
         <div class="body">
@@ -20,7 +20,31 @@
             <div class="color">待支付</div>
           </div>
 
-          <div class="right">金额：${{ item.totalAmount }}</div>
+          <div v-for="good of item.items" :key="good.itemId" class="item-info">
+            <image
+              class="item-img"
+              :src="good.itemDefaultImg"
+              mode="aspectFill"
+            ></image>
+
+            <div class="item-desc">
+              <div>
+                {{ good.itemName }}
+              </div>
+
+              <div>
+                <div>
+                  价格：${{ good.itemPrice }}
+                </div>
+
+                <div>
+                  数量：{{ good.itemQuantity }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right">总金额：${{ item.totalAmount }}</div>
 
           <div class="info">
             <div class="flex">
@@ -43,30 +67,36 @@
 </template>
 
 <script>
-import backButton from "@/components/backButton.vue";
+import dayjs from "dayjs";
 
 export default {
-  components: { backButton },
   data() {
     return {
-      list: []
-    }
+      list: [],
+    };
   },
   onLoad() {
-    wx.cloud.callFunction({
-      name: 'order',
-      data: {
-        method: 'getListByUserOpenIdAndPage',
-        pageQuery: {
-          curPage: 1,
-          limit: 10
-        }
-      }
-    }).then(res => {
-      console.log('res', res.result)
-      this.list = res.result.data
-    })
-  }
+    wx.cloud
+      .callFunction({
+        name: "order",
+        data: {
+          method: "getListByUserOpenIdAndPage",
+          pageQuery: {
+            curPage: 1,
+            limit: 10,
+          },
+        },
+      })
+      .then((res) => {
+        console.log("res", res.result);
+        this.list = res.result.data.map((item) => {
+          return {
+            ...item,
+            createTime: dayjs(item.createTime).format("YYYY-MM-DD HH:mm:ss"),
+          };
+        });
+      });
+  },
 };
 </script>
 
@@ -84,8 +114,28 @@ export default {
   background-color: #fff;
   border-radius: 16px;
   padding: 16px;
+  margin-bottom: 16px;
 
   .name {
+  }
+
+  .item-info {
+    display: flex;
+    height: 40px;
+    margin-bottom: 8px;
+
+    .item-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    .item-desc {
+      display: flex;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
   }
 }
 .flex {

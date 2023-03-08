@@ -9,12 +9,23 @@
         :key="index"
         @tap="handleCheckDetail(item._id)"
       >
-        <image
-          class="activity-image"
-          :src="item.headImages[0]"
-          mode="aspectFill"
-        />
-        {{ item.title }}
+        <div>
+          <image
+            class="activity-image"
+            :src="item.headImages[0]"
+            mode="aspectFill"
+          />
+          {{ item.title }}
+        </div>
+        <div>
+          <div v-for="order of item.orderList" :key="order._id">
+            {{ order.userName }}
+            <!-- TODO: -->
+            {{ order.createTime }}
+            {{ order.itemTitle }}
+            {{ order.itemQuantity }}
+          </div>
+        </div>
       </view>
     </view>
   </div>

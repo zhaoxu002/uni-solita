@@ -1,7 +1,16 @@
 class Order {
   constructor(
     sn,
-    { userOpenId, userName, userPhone, totalAmount, note, detailAddress, purchaseId, itemInfo },
+    {
+      userOpenId,
+      userName,
+      userPhone,
+      totalAmount,
+      note,
+      detailAddress,
+      purchaseId,
+      itemInfo,
+    }
   ) {
     this.sn = sn;
     this.purchaseId = purchaseId;
@@ -20,7 +29,7 @@ class Order {
 }
 
 class OrderItem {
-  constructor(orderSn, itemQuantity, item) {
+  constructor(orderSn, itemQuantity, item, activityId) {
     const {
       _id: itemId,
       name: itemName,
@@ -28,6 +37,7 @@ class OrderItem {
       subTitle: itemSubTitle,
       defaultImg: itemDefaultImg,
       price: itemPrice,
+      userName,
     } = item;
     this.orderSn = orderSn;
     this.itemId = itemId;
@@ -37,6 +47,8 @@ class OrderItem {
     this.itemDefaultImg = itemDefaultImg;
     this.itemPrice = itemPrice;
     this.itemQuantity = itemQuantity;
+    this.activityId = activityId;
+    this.userName = userName;
   }
 }
 
