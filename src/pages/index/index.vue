@@ -3,14 +3,16 @@
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
     <button @click="handleAccount">my</button>
     <view class="container">
-      <view class="activity" v-for="(item, index) in activities" :key="index">
+      <view
+        class="activity"
+        v-for="(item, index) in activities"
+        :key="index"
+        @tap="handleCheckDetail(item._id)"
+      >
         <image
           class="activity-image"
-          v-for="pic in item.headImages"
-          :src="pic"
-          :key="pic"
+          :src="item.headImages[0]"
           mode="aspectFill"
-          @tap="handleCheckDetail(item._id)"
         />
         {{ item.title }}
       </view>

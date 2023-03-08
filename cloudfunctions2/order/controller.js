@@ -1,26 +1,31 @@
-const cloud = require('wx-server-sdk');
-const { nanoid } = require('nanoid');
-const daoUtils = require('./utils/daoUtil');
-const { Order, OrderItem } = require('./orderVo');
-const { createSuccessResponse, createErrorResponse } = require('./utils/responseUtil');
+const cloud = require("wx-server-sdk");
+const { nanoid } = require("nanoid");
+const daoUtils = require("./utils/daoUtil");
+const { Order, OrderItem } = require("./orderVo");
+const {
+  createSuccessResponse,
+  createErrorResponse,
+} = require("./utils/responseUtil");
 
 cloud.init({
-  env: 'test-6guvdos0d2e13c77',
+  env: "test-6guvdos0d2e13c77",
 });
 
 // 初始化数据库连接
 const db = cloud.database();
 const _ = db.command;
-const orderCollection = db.collection('order');
-const orderItemCollection = db.collection('orderItem');
-const itemCollection = db.collection('item');
-const purchaseCollection = db.collection('purchase');
+const orderCollection = db.collection("order");
+const orderItemCollection = db.collection("orderItem");
+const itemCollection = db.collection("item");
+const purchaseCollection = db.collection("purchase");
 
 const searchOrderBySn = async (event, context) => {
   const { sn } = event;
   try {
     const order = await daoUtils.getOneBySearch(orderCollection, { sn });
-    const orderItems = await daoUtils.getList(orderItemCollection, { orderSn: sn });
+    const orderItems = await daoUtils.getList(orderItemCollection, {
+      orderSn: sn,
+    });
     order.items = orderItems;
     return createSuccessResponse(order);
   } catch (error) {
@@ -30,23 +35,26 @@ const searchOrderBySn = async (event, context) => {
 
 const searchOrderByUserOpenIdAndPage = async (event, context) => {
   const {
-    userOpenId,
+    // userOpenId,
     pageQuery: { curPage, limit },
   } = event;
+  const { OPENID } = cloud.getWXContext();
   try {
     const orders = await daoUtils.getListByPage(
       orderCollection,
-      { userOpenId, isDelete: _.not(_.eq(true)) },
+      { userOpenId: OPENID, isDelete: _.not(_.eq(true)) },
       curPage - 1,
-      limit,
+      limit
     );
     if (orders && orders.length) {
       await Promise.all(
         orders.map(async (order) => {
           const { sn } = order;
-          const orderItems = await daoUtils.getList(orderItemCollection, { orderSn: sn });
+          const orderItems = await daoUtils.getList(orderItemCollection, {
+            orderSn: sn,
+          });
           order.items = orderItems;
-        }),
+        })
       );
     }
     return createSuccessResponse(orders);
@@ -65,16 +73,18 @@ const searchOrderByPage = async (event, context) => {
       orderCollection,
       { ...query, isDelete: _.not(_.eq(true)) },
       curPage - 1,
-      limit,
+      limit
     );
     if (orders && orders.length) {
       await Promise.all(
         orders.map(async (order) => {
           const { sn } = order;
-          console.log('sn', sn);
-          const orderItems = await daoUtils.getList(orderItemCollection, { orderSn: sn });
+          console.log("sn", sn);
+          const orderItems = await daoUtils.getList(orderItemCollection, {
+            orderSn: sn,
+          });
           order.items = orderItems;
-        }),
+        })
       );
     }
     return createSuccessResponse(orders);
@@ -97,8 +107,8 @@ const deleteOrderBySn = async (event, context) => {
   const { sn } = event;
   try {
     await db.runTransaction(async (transaction) => {
-      const orderCollection = transaction.collection('order');
-      const orderItemCollection = transaction.collection('orderItem');
+      const orderCollection = transaction.collection("order");
+      const orderItemCollection = transaction.collection("orderItem");
       try {
         await daoUtils.deleteList(orderCollection, { sn });
       } catch (error) {
@@ -119,15 +129,23 @@ const deleteOrderBySn = async (event, context) => {
 };
 
 const createOrder = async (event, context) => {
-  const { data } = event;
+  const { data: payload } = event;
+  const wxContext = cloud.getWXContext();
+  const { OPENID } = wxContext;
+
+  const data = {
+    ...payload,
+    userOpenId: OPENID,
+  };
   const { itemsInfo, purchaseId } = data;
+
   try {
     const purchase = await daoUtils.getOne(purchaseCollection, purchaseId);
     if (db.serverDate() > purchase.endTime) {
-      return createErrorResponse('团购已结束');
+      return createErrorResponse("团购已结束");
     }
     if (db.serverDate() < purchase.startTime) {
-      return createErrorResponse('团购还未开始');
+      return createErrorResponse("团购还未开始");
     }
     // console.log('purchase==>', purchase);
     const itemIds = [];
@@ -140,7 +158,9 @@ const createOrder = async (event, context) => {
     // console.log('itemIdMapQuantity==>', itemIdMapQuantity);
     const sn = nanoid();
     const orderVo = new Order(sn, data);
-    const items = await daoUtils.getList(itemCollection, { _id: _.in(itemIds) });
+    const items = await daoUtils.getList(itemCollection, {
+      _id: _.in(itemIds),
+    });
     // console.log('items==>', items);
     const itemIdMapItem = new Map();
     items.forEach((item) => {
@@ -151,7 +171,7 @@ const createOrder = async (event, context) => {
       let currentItem = itemIdMapItem.get(itemId);
       let quantity = itemIdMapQuantity.get(itemId);
       if (quantity > currentItem.stock) {
-        return createErrorResponse('库存不足');
+        return createErrorResponse("库存不足");
       }
       totalAmount += quantity * currentItem.price;
     }
@@ -161,9 +181,9 @@ const createOrder = async (event, context) => {
     });
     // console.log('orderItemVos==>', orderItemVos);
     await db.runTransaction(async (transaction) => {
-      const orderCollection = transaction.collection('order');
-      const orderItemCollection = transaction.collection('orderItem');
-      const itemCollection = transaction.collection('item');
+      const orderCollection = transaction.collection("order");
+      const orderItemCollection = transaction.collection("orderItem");
+      const itemCollection = transaction.collection("item");
       try {
         await daoUtils.createOne(orderCollection, orderVo);
       } catch (error) {
@@ -174,7 +194,7 @@ const createOrder = async (event, context) => {
         await Promise.all(
           orderItemVos.map(async (orderItemVo) => {
             await daoUtils.createOne(orderItemCollection, orderItemVo);
-          }),
+          })
         );
       } catch (error) {
         await transaction.rollback();
@@ -188,7 +208,7 @@ const createOrder = async (event, context) => {
               stock: _.inc(-itemQuantity),
               saleCount: _.inc(itemQuantity),
             });
-          }),
+          })
         );
       } catch (error) {
         await transaction.rollback();
@@ -209,8 +229,8 @@ const cancelOrderBySn = async (event, context) => {
     });
 
     await db.runTransaction(async (transaction) => {
-      const orderCollection = transaction.collection('order');
-      const itemCollection = transaction.collection('item');
+      const orderCollection = transaction.collection("order");
+      const itemCollection = transaction.collection("item");
       try {
         await daoUtils.updateBySearch(orderCollection, { sn }, { status: 5 });
       } catch (error) {
@@ -226,7 +246,7 @@ const cancelOrderBySn = async (event, context) => {
               stock: _.inc(itemQuantity),
               saleCount: _.inc(-itemQuantity),
             });
-          }),
+          })
         );
       } catch (error) {
         await transaction.rollback();

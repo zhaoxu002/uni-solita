@@ -76,6 +76,7 @@ wx.cloud
         userOpenId: 'oKLCX5R8T7xun8nZcs4x_LLrJ1Is',
         userPhone: 13122020795,
         note: 'note1',
+        userName: 'zhao xu',
         locationId: 'fc8e646564060e0203272e1234557981',
         detailAddress: '94 Ngahue Drive Stonefields',
         itemsInfo: [

@@ -5,35 +5,35 @@
     <div class="header">标题</div>
 
     <div class="activity-list">
-      <div class="card">
+      <div class="card" v-for="item of list" :key="item._id">
         <div class="name">
-          测测这么长的接龙名字测测这么长的接龙名字测测这么长的接龙名字测测这么长的接龙名字
+          {{ item._id }}
         </div>
 
         <div class="body">
           <div class="flex">
             <div>
               <div class="bold">接龙号：29</div>
-              <div class="secondary">2023-02-22 18:14:16</div>
+              <div class="secondary">{{ item.createTime }}</div>
             </div>
 
             <div class="color">待支付</div>
           </div>
 
-          <div class="right">金额：$1599.99</div>
+          <div class="right">金额：${{ item.totalAmount }}</div>
 
           <div class="info">
             <div class="flex">
               <div class="title">自提点：</div>
               <div class="content">
-                <div class="address">半岛</div>
-                <div class="address-info">61D, Kervil Avenue,</div>
+                <div class="address">{{ item.detailAddress }}</div>
+                <div class="address-info"></div>
               </div>
             </div>
 
             <div class="flex">
               <div class="title">电话号码：</div>
-              <div class="content">03123455312</div>
+              <div class="content">{{ item.userPhone }}</div>
             </div>
           </div>
         </div>
@@ -47,7 +47,26 @@ import backButton from "@/components/backButton.vue";
 
 export default {
   components: { backButton },
-
+  data() {
+    return {
+      list: []
+    }
+  },
+  onLoad() {
+    wx.cloud.callFunction({
+      name: 'order',
+      data: {
+        method: 'getListByUserOpenIdAndPage',
+        pageQuery: {
+          curPage: 1,
+          limit: 10
+        }
+      }
+    }).then(res => {
+      console.log('res', res.result)
+      this.list = res.result.data
+    })
+  }
 };
 </script>
 

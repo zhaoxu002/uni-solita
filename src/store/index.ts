@@ -6,14 +6,14 @@ Vue.use(Vuex)
 interface Cart {
   activityId: string;
   goods: {
-    id: string;
+    _id: string;
     amount: number;
   }[]
 }
 
 interface Location {
-  location: string;
-  title: string;
+  detailAddress: string;
+  description: string;
   _id: string;
 }
 
