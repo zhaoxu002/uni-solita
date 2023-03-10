@@ -25,20 +25,36 @@ const searchPurchaseById = async (event, context) => {
   try {
     const purchase = await daoUtils.getOne(collection, _id);
     const { itemIds, locationIds } = purchase;
-    const items = await daoUtils.getList(itemCollection, {
-      _id: _.in(itemIds),
-    });
-    const locations = await daoUtils.getList(locationCollection, {
-      _id: _.in(locationIds),
-    });
+    // const items = await daoUtils.getList(itemCollection, {
+    //   _id: _.in(itemIds),
+    // });
+    // const locations = await daoUtils.getList(locationCollection, {
+    //   _id: _.in(locationIds),
+    // });
 
-    const orderItems = await daoUtils.getList(orderItemCollection, {
-      activityId: _.eq(_id),
-    });
+    // const orderItems = await daoUtils.getList(orderItemCollection, {
+    //   activityId: _.eq(_id)
+    // })
+
+    const [
+      items,
+      locations,
+      orderItems
+    ] = await Promise.all([
+      daoUtils.getList(itemCollection, {
+        _id: _.in(itemIds),
+      }),
+      daoUtils.getList(locationCollection, {
+        _id: _.in(locationIds),
+      }),
+      daoUtils.getList(orderItemCollection, {
+        activityId: _.eq(_id)
+      })
+    ])
 
     purchase.items = items;
     purchase.locations = locations;
-    purchase.orderItems = orderItems;
+    purchase.orderItems = orderItems
 
     return createSuccessResponse(purchase);
   } catch (error) {
@@ -52,20 +68,8 @@ const searchPurchaseByPage = async (event, context) => {
     pageQuery: { curPage, limit },
   } = event;
   try {
-    // const purchases = await daoUtils.getListByPage(
-    //   collection,
-    //   { ...query, isDelete: _.not(_.eq(true)) },
-    //   curPage - 1,
-    //   limit
-    // );
     return collection
       .aggregate()
-      .lookup({
-        from: "orderItem",
-        localField: "_id",
-        foreignField: "activityId",
-        as: "orderList",
-      })
       .match({
         ...query,
         isDelete: _.not(_.eq(true)),
@@ -75,6 +79,12 @@ const searchPurchaseByPage = async (event, context) => {
       })
       .skip((curPage - 1) * limit)
       .limit(limit)
+      .lookup({
+        from: "orderItem",
+        localField: "_id",
+        foreignField: "activityId",
+        as: "orderList",
+      })
       .end()
       .then((res) => {
         console.log(res);
@@ -82,7 +92,6 @@ const searchPurchaseByPage = async (event, context) => {
       }).catch(err => {
         return createErrorResponse(err)
       })
-    // return createSuccessResponse(purchases);
   } catch (error) {
     return createErrorResponse(error);
   }

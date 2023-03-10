@@ -9,13 +9,21 @@
         :key="index"
         @tap="handleCheckDetail(item._id)"
       >
-        <div>
+        <div class="info-content">
           <image
             class="activity-image"
             :src="item.headImages[0]"
             mode="aspectFill"
           />
-          {{ item.title }}
+          <div>
+            <div>{{ item.startTimeFromNow }} 发布</div>
+            <div>
+              {{ item.formatEndTime }}
+            </div>
+            <div>
+              {{ item.title }}
+            </div>
+          </div>
         </div>
         <div>
           <div v-for="order of item.orderList" :key="order._id">
@@ -33,6 +41,11 @@
 
 <script>
 import Vue from "vue";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+require('dayjs/locale/zh-cn')
+dayjs.extend(relativeTime);
+dayjs.locale("zh-cn");
 
 export default Vue.extend({
   data() {
@@ -46,17 +59,6 @@ export default Vue.extend({
   },
   methods: {
     handleGetActivities() {
-      // wx.cloud
-      //   .callFunction({
-      //     name: "getActivities",
-      //   })
-      //   .then((res) => {
-      //     console.log(res);
-      //     // this.setData({
-      //     //     activities: res.result.data
-      //     // });
-      //     this.activities = res.result.data;
-      //   });
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -67,22 +69,19 @@ export default Vue.extend({
           },
         })
         .then((res) => {
-          this.activities = res.result.data;
+          this.activities = res.result.data.map((item) => {
+            return {
+              ...item,
+              formatEndTime: dayjs(item.endTime * 1000).format(
+                "YYYY-MM-DD HH:mm:ss"
+              ),
+              startTimeFromNow: dayjs(item.startTime).fromNow(),
+            };
+          });
         });
     },
 
     handleCheckDetail(id) {
-      // console.log(e.target.id);
-      // wx.cloud
-      //     .callFunction({
-      //         name: 'getActivityDetail',
-      //         data: {
-      //             id: id
-      //         }
-      //     })
-      //     .then((res) => {
-      //         console.log(res.result.data);
-      //     });
       wx.navigateTo({
         url: "/pages/activity/index?id=" + id,
       });
@@ -114,7 +113,10 @@ export default Vue.extend({
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
-  display: flex;
+
+  .info-content {
+    display: flex;
+  }
 
   .activity-image {
     width: 80px;

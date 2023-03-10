@@ -1,7 +1,12 @@
 <template>
   <view class="container">
+    <div class="head-img-container">
+      <img :src="headImages[0]" class="head-img" mode="aspectFill" />
+    </div>
+
     <div class="info-container">
       <div>{{ title }}</div>
+      <div v-if="endTime">{{ formatEndTime }} 结束</div>
       <button open-type="share">转发</button>
       <mp-html
         class="rich-text"
@@ -29,9 +34,16 @@
       </div>
     </div>
 
-    <!-- <page-view :show="pageContainerShow" round overlay close-on-slide-down>
+    <div class="record-container">
+      <div class="record" v-for="record of records" :key="record._id">
+        {{ record.userName }} 购买了
 
-    </page-view> -->
+        {{ record.itemName }}
+
+        {{ record.itemQuantity }}
+      </div>
+    </div>
+
     <uni-popup
       ref="popup"
       type="bottom"
@@ -80,7 +92,11 @@
           v-for="item of selected.selectedGoods"
           :key="item._id"
         >
-          <image mode="aspectFit" class="selected-img" :src="item.images[0]" />
+          <image
+            mode="aspectFill"
+            class="selected-img"
+            :src="item.defaultImg"
+          />
           <div>
             <div>{{ item.name }}</div>
             <div>{{ item.price }}</div>
@@ -98,6 +114,7 @@
 import backButton from "@/components/backButton.vue";
 import store from "@/store/index";
 import formatImage from "@/utils/formatHTMLImage";
+import dayjs from "dayjs";
 
 export default {
   components: { backButton },
@@ -106,7 +123,10 @@ export default {
       activityId: "",
       title: "",
       description: "",
+      endTime: 0,
       goods: [],
+      records: [],
+      headImages: [],
 
       pageContainerShow: false,
       goodDetail: null,
@@ -114,6 +134,9 @@ export default {
   },
 
   computed: {
+    formatEndTime() {
+      return dayjs(this.endTime * 1000).format("YYYY-MM-DD HH:mm:ss");
+    },
     selected() {
       const selectedGoods = this.goods.filter((item) => item.amount > 0);
       const selectedPrice = selectedGoods
@@ -146,10 +169,18 @@ export default {
       })
       .then((res) => {
         console.log(res.result.data);
-        const { description, title, items, locations, status, endTime } =
-          res.result.data;
+        const {
+          description,
+          title,
+          items,
+          locations,
+          endTime,
+          orderItems,
+          headImages,
+        } = res.result.data;
 
         this.activityId = id;
+        this.endTime = endTime;
         this.description = formatImage(description);
         this.title = title;
         this.goods = items.map((item) => {
@@ -158,6 +189,8 @@ export default {
             amount: 0,
           };
         });
+        this.records = orderItems;
+        this.headImages = headImages;
         store.commit("updateLocationList", locations);
       });
 
@@ -256,7 +289,21 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.head-img-container {
+  width: 100vw;
+  height: 250px;
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 1)
+  );
+  background-size: 100vw 16px;
+  background-position: bottom;
 
+  .head-img {
+    width: 100vw;
+    height: 250px;
+  }
+}
 .container {
   /* margin-top: 88px; */
   padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
