@@ -43,7 +43,7 @@
 import Vue from "vue";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-require('dayjs/locale/zh-cn')
+require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
@@ -52,6 +52,7 @@ export default Vue.extend({
     return {
       title: "Hello",
       activities: [],
+      total: 0,
     };
   },
   onLoad() {
@@ -69,7 +70,9 @@ export default Vue.extend({
           },
         })
         .then((res) => {
-          this.activities = res.result.data.map((item) => {
+          const { data: activities, total } = res.result.data;
+          console.log(activities);
+          this.activities = activities.map((item) => {
             return {
               ...item,
               formatEndTime: dayjs(item.endTime * 1000).format(
@@ -78,6 +81,7 @@ export default Vue.extend({
               startTimeFromNow: dayjs(item.startTime).fromNow(),
             };
           });
+          this.total = total;
         });
     },
 

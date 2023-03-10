@@ -13,6 +13,7 @@ cloud.init({
 // 初始化数据库连接
 const db = cloud.database();
 const _ = db.command;
+const $ = _.aggregate;
 const collection = db.collection("purchase");
 const itemCollection = db.collection("item");
 const locationCollection = db.collection("location");
@@ -36,11 +37,7 @@ const searchPurchaseById = async (event, context) => {
     //   activityId: _.eq(_id)
     // })
 
-    const [
-      items,
-      locations,
-      orderItems
-    ] = await Promise.all([
+    const [items, locations, orderItems] = await Promise.all([
       daoUtils.getList(itemCollection, {
         _id: _.in(itemIds),
       }),
@@ -48,13 +45,13 @@ const searchPurchaseById = async (event, context) => {
         _id: _.in(locationIds),
       }),
       daoUtils.getList(orderItemCollection, {
-        activityId: _.eq(_id)
-      })
-    ])
+        activityId: _.eq(_id),
+      }),
+    ]);
 
     purchase.items = items;
     purchase.locations = locations;
-    purchase.orderItems = orderItems
+    purchase.orderItems = orderItems;
 
     return createSuccessResponse(purchase);
   } catch (error) {
@@ -68,31 +65,57 @@ const searchPurchaseByPage = async (event, context) => {
     pageQuery: { curPage, limit },
   } = event;
   try {
-    return collection
-      .aggregate()
-      .match({
-        ...query,
-        isDelete: _.not(_.eq(true)),
-      })
-      .sort({
-        createTime: -1,
-      })
-      .skip((curPage - 1) * limit)
-      .limit(limit)
-      .lookup({
-        from: "orderItem",
-        localField: "_id",
-        foreignField: "activityId",
-        as: "orderList",
-      })
-      .end()
-      .then((res) => {
-        console.log(res);
-        return createSuccessResponse(res.list)
-      }).catch(err => {
-        return createErrorResponse(err)
-      })
+    const [{ list }, { total }] = await Promise.all([
+      collection
+        .aggregate()
+        .match({
+          ...query,
+          isDelete: _.not(_.eq(true)),
+        })
+        .sort({
+          createTime: -1,
+        })
+        .skip((curPage - 1) * limit)
+        .limit(limit)
+        .lookup({
+          from: "orderItem",
+          localField: "_id",
+          foreignField: "activityId",
+          as: "orderList",
+        })
+        .lookup({
+          from: "order",
+          localField: "_id",
+          foreignField: "purchaseId",
+          as: "orders",
+        })
+        .end(),
+
+      collection
+        .where({
+          ...query,
+          isDelete: _.not(_.eq(true)),
+        })
+        .count(),
+    ]);
+
+    list.forEach((item) => {
+      const { orders, orderList } = item;
+      orderList.forEach((orderItem) => {
+        const { orderSn } = orderItem;
+        let order = orders.find((order) => order.sn === orderSn);
+        orderItem = Object.assign(orderItem, order);
+      });
+      delete item.orders;
+    });
+
+    const dest = {
+      data: list,
+      total,
+    };
+    return createSuccessResponse(dest);
   } catch (error) {
+    console.log(error);
     return createErrorResponse(error);
   }
 };
