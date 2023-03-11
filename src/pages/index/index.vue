@@ -1,7 +1,7 @@
 <template>
   <div>
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
-    <button @click="handleAccount">my</button>
+    <button @click="handleAccount">我的订单</button>
     <view class="container">
       <view
         class="activity"
@@ -29,12 +29,17 @@
           <div v-for="order of item.orderList" :key="order._id">
             {{ order.userName }}
             <!-- TODO: -->
-            {{ order.createTime }}
+            {{ order.createTimeFromNow }}
             {{ order.itemTitle }}
             {{ order.itemQuantity }}
           </div>
         </div>
       </view>
+
+      <uni-load-more
+        :status="loadingStatus"
+        @clickLoadMore="handleGetActivities"
+      />
     </view>
   </div>
 </template>
@@ -43,7 +48,7 @@
 import Vue from "vue";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-require('dayjs/locale/zh-cn')
+require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
@@ -52,33 +57,64 @@ export default Vue.extend({
     return {
       title: "Hello",
       activities: [],
+
+      loadingStatus: "more",
+      current: 1,
+      pageSize: 20,
+      total: 0,
     };
   },
   onLoad() {
     this.handleGetActivities();
   },
+  onReachBottom() {
+    this.handleGetActivities();
+  },
   methods: {
     handleGetActivities() {
+      if (this.loadingStatus === "loading") return;
+
+      this.loadingStatus = "loading";
       wx.cloud
         .callFunction({
           name: "purchase",
           data: {
             method: "getListByPage",
             query: {},
-            pageQuery: { curPage: 1, limit: 10 },
+            pageQuery: { curPage: this.current, limit: this.pageSize },
           },
         })
         .then((res) => {
-          this.activities = res.result.data.map((item) => {
-            return {
-              ...item,
-              formatEndTime: dayjs(item.endTime * 1000).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
-              startTimeFromNow: dayjs(item.startTime).fromNow(),
-            };
-          });
-        });
+          this.activities = this.activities.concat(
+            res.result.data.data.map((item) => {
+              return {
+                ...item,
+                formatEndTime: dayjs(item.endTime * 1000).format(
+                  "YYYY-MM-DD HH:mm:ss"
+                ),
+                startTimeFromNow: dayjs(item.startTime).fromNow(),
+                orderList: item.orderList.map((order) => {
+                  return {
+                    ...order,
+                    createTimeFromNow: dayjs(order.createTime).fromNow(),
+                  };
+                }),
+              };
+            })
+          );
+
+          this.total = res.result.data.total;
+
+          if (res.result.data.data.length < this.pageSize) {
+            this.loadingStatus = "noMore";
+          } else {
+            this.loadingStatus = "more";
+          }
+
+          this.current += 1;
+        }).catch(() => {
+          this.loadingStatus = 'noMore'
+        })
     },
 
     handleCheckDetail(id) {
