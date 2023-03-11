@@ -81,7 +81,7 @@ const searchOrderByUserOpenIdAndPage = async (event, context) => {
         .count(),
     ]);
     list.forEach((order) => {
-      order.purchaseTitle = order?.purchase?.[0]?.title;
+      order.purchaseTitle = order.purchase[0].title;
       delete order.purchase;
     });
     return createPageSuccessResponse(list, total);
@@ -106,7 +106,6 @@ const searchOrderByPage = async (event, context) => {
       await Promise.all(
         orders.map(async (order) => {
           const { sn } = order;
-          console.log("sn", sn);
           const orderItems = await daoUtils.getList(orderItemCollection, {
             orderSn: sn,
           });
@@ -174,21 +173,17 @@ const createOrder = async (event, context) => {
     if (db.serverDate() < purchase.startTime) {
       return createErrorResponse("团购还未开始");
     }
-    // console.log('purchase==>', purchase);
     const itemIds = [];
     const itemIdMapQuantity = new Map();
     itemsInfo.forEach(({ itemId, itemQuantity }) => {
       itemIds.push(itemId);
       itemIdMapQuantity.set(itemId, itemQuantity);
     });
-    // console.log('itemIds==>', itemIds);
-    // console.log('itemIdMapQuantity==>', itemIdMapQuantity);
     const sn = nanoid();
     const orderVo = new Order(sn, data);
     const items = await daoUtils.getList(itemCollection, {
       _id: _.in(itemIds),
     });
-    // console.log('items==>', items);
     const itemIdMapItem = new Map();
     items.forEach((item) => {
       itemIdMapItem.set(item._id, item);
@@ -211,7 +206,6 @@ const createOrder = async (event, context) => {
         purchase._id
       );
     });
-    // console.log('orderItemVos==>', orderItemVos);
     await db.runTransaction(async (transaction) => {
       const orderCollection = transaction.collection("order");
       const orderItemCollection = transaction.collection("orderItem");
