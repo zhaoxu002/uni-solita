@@ -27,12 +27,21 @@
         </div>
         <div>
           <div v-for="order of item.orderList" :key="order._id" class="order">
-            <span>{{ order.userName }}</span>
-            <!-- TODO: -->
-            <span>{{ order.createTimeFromNow }} 购买了</span>
-            <span>{{ order.itemTitle }}</span>
-            <span>* {{ order.itemQuantity }}</span>
+            <div>
+              <span>{{ order.userName }} &nbsp;</span>
+              <!-- TODO: -->
+              <span>&nbsp;{{ order.createTimeFromNow }} 购买了</span>
+            </div>
+            <div>
+              <span>{{ order.itemTitle }}</span>
+              <span>&nbsp;+{{ order.itemQuantity }}</span>
+            </div>
           </div>
+        </div>
+
+        <div>
+          <span v-if="(item.endTime * 1000) > now">进行中</span>
+          <span v-else>已结束</span>
         </div>
       </view>
 
@@ -57,6 +66,7 @@ export default Vue.extend({
     return {
       title: "Hello",
       activities: [],
+      now: Date.now(),
 
       loadingStatus: "more",
       current: 1,
@@ -67,6 +77,12 @@ export default Vue.extend({
   onLoad() {
     this.handleGetActivities();
   },
+  onPullDownRefresh() {
+    this.current = 1;
+    this.total = 0;
+    this.handleGetActivities();
+  },
+
   onReachBottom() {
     this.handleGetActivities();
   },
