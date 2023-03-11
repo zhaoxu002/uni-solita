@@ -11,7 +11,11 @@
         </uni-forms-item>
 
         <uni-forms-item label="昵称" name="userName" required>
-          <input type="nickname" id="nickname-input" placeholder="请填写您的微信昵称" />
+          <input
+            type="nickname"
+            id="nickname-input"
+            placeholder="请填写您的微信昵称"
+          />
         </uni-forms-item>
 
         <uni-forms-item label="电话" name="userPhone" required>
@@ -22,28 +26,25 @@
         <uni-forms-item label="备注" name="note">
           <uni-easyinput v-model="formData.note"></uni-easyinput>
         </uni-forms-item>
-
-
       </uni-forms>
     </div>
 
     <div class="card">
       <div v-for="item of cart.goods" :key="item._id" class="item">
-        <img :src="item.images[0]" class="image" mode="aspectFill" />
-        <div>
-          {{ item.name }}
-        </div>
+        <img :src="item.defaultImg" class="image" mode="aspectFill" />
 
-        <div>
-          {{ item.amount }}
-        </div>
+        <div class="info">
+          <div>
+            {{ item.name }}
+          </div>
 
-        <div>
-          {{ item.price }}
+          <div>数量：{{ item.amount }}</div>
+
+          <div>单价：$ {{ item.price }}</div>
         </div>
       </div>
 
-      <div>{{ totalPrice }}</div>
+      <div>总价：$ {{ totalPrice }}</div>
     </div>
 
     <div class="bottom-fixed">
@@ -135,15 +136,24 @@ export default {
 
             console.log("data", data);
 
-            wx.cloud.callFunction({
-              name: "order",
-              data: {
-                method: "createOne",
-                data
-              },
-            }).then(res => {
-              console.log('success', res)
-            })
+            wx.cloud
+              .callFunction({
+                name: "order",
+                data: {
+                  method: "createOne",
+                  data,
+                },
+              })
+              .then((res) => {
+                console.log("success", res);
+
+                wx.redirectTo({
+                  url: "/pages/person/index",
+                });
+              })
+              .catch((err) => {
+                alert("Whoops 出错了");
+              });
           });
         });
     },

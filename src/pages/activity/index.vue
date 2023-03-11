@@ -27,19 +27,15 @@
           />
           <div class="good-info">
             <div class="name">{{ item.name }}</div>
-            <div class="price">
-              $ {{ item.price }}
-            </div>
+            <div class="price">$ {{ item.price }}</div>
+            <div class="origin-price">{{ item.originPrice }}</div>
+            <uni-number-box
+              v-model="item.amount"
+              :min="0"
+              :step="1"
+              background="#f2828d"
+            />
           </div>
-
-
-          <div class="origin-price">{{ item.originPrice }}</div>
-          <uni-number-box
-            v-model="item.amount"
-            :min="0"
-            :step="1"
-            background="#f2828d"
-          />
         </div>
       </div>
 
@@ -346,7 +342,8 @@ export default {
   border-radius: 4px;
   margin: 16rpx;
   width: 327rpx;
-  height: 600rpx;
+  /* height: 600rpx; */
+  padding-bottom: 8px;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -387,8 +384,10 @@ export default {
   background: #fff;
 
   .bar-content {
-    height: 44px;
+    height: 54px;
+    padding: 0 32rpx;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     z-index: 10000;
   }
@@ -396,8 +395,16 @@ export default {
   .confirm {
     height: 40px;
     border-radius: 20px;
+    width: 60vw;
+    margin: 0;
+    line-height: 40px;
   }
 }
+
+.record-container {
+  margin-bottom: 66px;
+}
+
 .popup-container {
   padding: 16px;
 }

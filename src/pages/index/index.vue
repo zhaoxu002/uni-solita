@@ -26,12 +26,12 @@
           </div>
         </div>
         <div>
-          <div v-for="order of item.orderList" :key="order._id">
-            {{ order.userName }}
+          <div v-for="order of item.orderList" :key="order._id" class="order">
+            <span>{{ order.userName }}</span>
             <!-- TODO: -->
-            {{ order.createTimeFromNow }}
-            {{ order.itemTitle }}
-            {{ order.itemQuantity }}
+            <span>{{ order.createTimeFromNow }} 购买了</span>
+            <span>{{ order.itemTitle }}</span>
+            <span>* {{ order.itemQuantity }}</span>
           </div>
         </div>
       </view>
@@ -112,9 +112,10 @@ export default Vue.extend({
           }
 
           this.current += 1;
-        }).catch(() => {
-          this.loadingStatus = 'noMore'
         })
+        .catch(() => {
+          this.loadingStatus = "noMore";
+        });
     },
 
     handleCheckDetail(id) {
@@ -160,6 +161,13 @@ export default Vue.extend({
     border-radius: 4px;
     margin-right: 8px;
   }
+}
+.order {
+  font-size: 12px;
+  display: flex;
+  color: $uni-text-color-grey;
+  line-height: 1.8;
+  justify-content: space-between;
 }
 
 .content {
