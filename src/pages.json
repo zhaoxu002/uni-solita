@@ -15,7 +15,7 @@
     {
       "path": "pages/person/index",
       "style": {
-        "navigationBarTitleText": "我参与的"
+        "navigationBarTitleText": "我的订单"
       }
     },
     {

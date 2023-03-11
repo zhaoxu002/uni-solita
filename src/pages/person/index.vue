@@ -13,14 +13,17 @@
         <div class="body">
           <div class="flex">
             <div>
-              <div class="bold">接龙号：29</div>
-              <div class="secondary">{{ item.createTime }}</div>
+              <div class="secondary">下单时间：{{ item.createTime }}</div>
             </div>
 
-            <div class="color">待支付</div>
+            <!-- <div class="color">待支付</div> -->
           </div>
 
-          <div v-for="good of item.items" :key="good.itemId" class="item-info">
+          <div
+            v-for="good of item.orderItems"
+            :key="good.itemId"
+            class="item-info"
+          >
             <image
               class="item-img"
               :src="good.itemDefaultImg"
@@ -33,13 +36,9 @@
               </div>
 
               <div>
-                <div>
-                  价格：${{ good.itemPrice }}
-                </div>
+                <div>价格：${{ good.itemPrice }}</div>
 
-                <div>
-                  数量：{{ good.itemQuantity }}
-                </div>
+                <div>数量：{{ good.itemQuantity }}</div>
               </div>
             </div>
           </div>
@@ -73,29 +72,61 @@ export default {
   data() {
     return {
       list: [],
+
+      loadingStatus: "more",
+      current: 1,
+      pageSize: 20,
+      total: 0,
     };
   },
   onLoad() {
-    wx.cloud
-      .callFunction({
-        name: "order",
-        data: {
-          method: "getListByUserOpenIdAndPage",
-          pageQuery: {
-            curPage: 1,
-            limit: 10,
+    this.handleFetch();
+  },
+
+  methods: {
+    handleFetch() {
+      if (this.loadingStatus === "loading") return;
+
+      this.loadingStatus = "loading";
+
+      wx.cloud
+        .callFunction({
+          name: "order",
+          data: {
+            method: "getListByUserOpenIdAndPage",
+            pageQuery: {
+              curPage: 1,
+              limit: 10,
+            },
           },
-        },
-      })
-      .then((res) => {
-        console.log("res", res.result);
-        this.list = res.result.data.map((item) => {
-          return {
-            ...item,
-            createTime: dayjs(item.createTime).format("YYYY-MM-DD HH:mm:ss"),
-          };
+        })
+        .then((res) => {
+          console.log("res", res.result);
+          this.list = this.list.concat(
+            res.result.data.data.map((item) => {
+              return {
+                ...item,
+                createTime: dayjs(item.createTime).format(
+                  "YYYY-MM-DD HH:mm:ss"
+                ),
+              };
+            })
+          );
+
+          this.total = res.result.data.total;
+
+          if (res.result.data.data.length < this.pageSize) {
+            this.loadingStatus = "noMore";
+          } else {
+            this.loadingStatus = "more";
+          }
+
+          this.current += 1;
+        })
+        .catch(() => {
+          this.loadingStatus = "noMore";
         });
-      });
+    },
   },
 };
 </script>
@@ -103,7 +134,7 @@ export default {
 <style lang="scss">
 .container {
   padding: 16px;
-  margin-top: 88px;
+  /* margin-top: 88px; */
   background: #f7f9fa;
 }
 .header {
