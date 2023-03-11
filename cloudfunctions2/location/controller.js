@@ -1,15 +1,19 @@
-const cloud = require('wx-server-sdk');
-const daoUtils = require('./utils/daoUtil');
-const Location = require('./locationVo');
-const { createSuccessResponse, createErrorResponse } = require('./utils/responseUtil');
+const cloud = require("wx-server-sdk");
+const daoUtils = require("./utils/daoUtil");
+const Location = require("./locationVo");
+const {
+  createSuccessResponse,
+  createPageSuccessResponse,
+  createErrorResponse,
+} = require("./utils/responseUtil");
 
 cloud.init({
-  env: 'test-6guvdos0d2e13c77',
+  env: "test-6guvdos0d2e13c77",
 });
 
 // 初始化数据库连接
 const db = cloud.database();
-const collection = db.collection('location');
+const collection = db.collection("location");
 
 const searchLocationById = async (event, context) => {
   const { _id } = event;
@@ -27,8 +31,11 @@ const searchLocationByPage = async (event, context) => {
     pageQuery: { curPage, limit },
   } = event;
   try {
-    const locations = await daoUtils.getListByPage(collection, query, curPage - 1, limit);
-    return createSuccessResponse(locations);
+    const [list, { total }] = await Promise.all([
+      daoUtils.getListByPage(collection, query, curPage - 1, limit),
+      collection.where(query).count(),
+    ]);
+    return createPageSuccessResponse(list, total);
   } catch (error) {
     return createErrorResponse(error);
   }

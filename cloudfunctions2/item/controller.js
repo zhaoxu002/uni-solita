@@ -1,16 +1,20 @@
-const cloud = require('wx-server-sdk');
-const daoUtils = require('./utils/daoUtil');
-const Item = require('./itemVo');
-const { createSuccessResponse, createErrorResponse } = require('./utils/responseUtil');
+const cloud = require("wx-server-sdk");
+const daoUtils = require("./utils/daoUtil");
+const Item = require("./itemVo");
+const {
+  createSuccessResponse,
+  createErrorResponse,
+  createPageSuccessResponse,
+} = require("./utils/responseUtil");
 
 cloud.init({
-  env: 'test-6guvdos0d2e13c77',
+  env: "test-6guvdos0d2e13c77",
 });
 
 // 初始化数据库连接
 const db = cloud.database();
 const _ = db.command;
-const collection = db.collection('item');
+const collection = db.collection("item");
 
 const searchItemById = async (event, context) => {
   const { _id } = event;
@@ -28,13 +32,16 @@ const searchItemsByPage = async (event, context) => {
     pageQuery: { curPage, limit },
   } = event;
   try {
-    const items = await daoUtils.getListByPage(
-      collection,
-      { ...query, isDelete: _.not(_.eq(true)) },
-      curPage - 1,
-      limit,
-    );
-    return createSuccessResponse(items);
+    const [list, { total }] = await Promise.all([
+      daoUtils.getListByPage(
+        collection,
+        { ...query, isDelete: _.not(_.eq(true)) },
+        curPage - 1,
+        limit
+      ),
+      collection.where({ ...query, isDelete: _.not(_.eq(true)) }).count(),
+    ]);
+    return createPageSuccessResponse(list, total);
   } catch (error) {
     return createErrorResponse(error);
   }

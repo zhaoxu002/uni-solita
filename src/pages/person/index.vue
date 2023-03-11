@@ -33,13 +33,9 @@
               </div>
 
               <div>
-                <div>
-                  价格：${{ good.itemPrice }}
-                </div>
+                <div>价格：${{ good.itemPrice }}</div>
 
-                <div>
-                  数量：{{ good.itemQuantity }}
-                </div>
+                <div>数量：{{ good.itemQuantity }}</div>
               </div>
             </div>
           </div>
@@ -73,6 +69,7 @@ export default {
   data() {
     return {
       list: [],
+      total: 0,
     };
   },
   onLoad() {
@@ -89,12 +86,14 @@ export default {
       })
       .then((res) => {
         console.log("res", res.result);
-        this.list = res.result.data.map((item) => {
+        const { data, total } = res.result.data;
+        this.list = data.map((item) => {
           return {
             ...item,
             createTime: dayjs(item.createTime).format("YYYY-MM-DD HH:mm:ss"),
           };
         });
+        this.total = total;
       });
   },
 };

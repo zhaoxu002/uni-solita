@@ -5,6 +5,7 @@ const { Order, OrderItem } = require("./orderVo");
 const {
   createSuccessResponse,
   createErrorResponse,
+  createPageSuccessResponse,
 } = require("./utils/responseUtil");
 
 cloud.init({
@@ -22,12 +23,19 @@ const purchaseCollection = db.collection("purchase");
 const searchOrderBySn = async (event, context) => {
   const { sn } = event;
   try {
-    const order = await daoUtils.getOneBySearch(orderCollection, { sn });
-    const orderItems = await daoUtils.getList(orderItemCollection, {
-      orderSn: sn,
-    });
-    order.items = orderItems;
-    return createSuccessResponse(order);
+    const { list } = await collection
+      .aggregate()
+      .match({
+        sn,
+      })
+      .lookup({
+        from: "orderItem",
+        localField: "sn",
+        foreignField: "orderSn",
+        as: "items",
+      })
+      .end();
+    return createSuccessResponse(list);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -35,34 +43,48 @@ const searchOrderBySn = async (event, context) => {
 
 const searchOrderByUserOpenIdAndPage = async (event, context) => {
   const {
-    // userOpenId,
     pageQuery: { curPage, limit },
   } = event;
   const { OPENID } = cloud.getWXContext();
   try {
-    const orders = await daoUtils.getListByPage(
-      orderCollection,
-      { userOpenId: OPENID, isDelete: _.not(_.eq(true)) },
-      curPage - 1,
-      limit
-    );
-    if (orders && orders.length) {
-      await Promise.all(
-        orders.map(async (order) => {
-          const { sn, purchaseId } = order;
-          const orderItems = await daoUtils.getList(orderItemCollection, {
-            orderSn: sn,
-          });
-          const purchase = await daoUtils.getOne(
-            purchaseCollection,
-            purchaseId
-          );
-          order.items = orderItems;
-          order.purchaseTitle = purchase.title;
+    const [{ list }, { total }] = await Promise.all([
+      orderCollection
+        .aggregate()
+        .match({
+          userOpenId: OPENID,
+          isDelete: _.not(_.eq(true)),
         })
-      );
-    }
-    return createSuccessResponse(orders);
+        .sort({
+          createTime: -1,
+        })
+        .skip((curPage - 1) * limit)
+        .limit(limit)
+        .lookup({
+          from: "orderItem",
+          localField: "sn",
+          foreignField: "orderSn",
+          as: "orderItems",
+        })
+        .lookup({
+          from: "purchase",
+          localField: "purchaseId",
+          foreignField: "_id",
+          as: "purchase",
+        })
+        .end(),
+
+      orderCollection
+        .where({
+          userOpenId: OPENID,
+          isDelete: _.not(_.eq(true)),
+        })
+        .count(),
+    ]);
+    list.forEach((order) => {
+      order.purchaseTitle = order?.purchase?.[0]?.title;
+      delete order.purchase;
+    });
+    return createPageSuccessResponse(list, total);
   } catch (error) {
     return createErrorResponse(error);
   }

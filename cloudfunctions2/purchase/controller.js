@@ -4,6 +4,7 @@ const Purchase = require("./purchaseVo");
 const {
   createSuccessResponse,
   createErrorResponse,
+  createPageSuccessResponse,
 } = require("./utils/responseUtil");
 
 cloud.init({
@@ -13,47 +14,36 @@ cloud.init({
 // 初始化数据库连接
 const db = cloud.database();
 const _ = db.command;
-const $ = _.aggregate;
 const collection = db.collection("purchase");
-const itemCollection = db.collection("item");
-const locationCollection = db.collection("location");
-const orderItemCollection = db.collection("orderItem");
 
-// TODO 获取团购的购买用户(数量)
-// TODO 分页添加总数量
 const searchPurchaseById = async (event, context) => {
   const { _id } = event;
   try {
-    const purchase = await daoUtils.getOne(collection, _id);
-    const { itemIds, locationIds } = purchase;
-    // const items = await daoUtils.getList(itemCollection, {
-    //   _id: _.in(itemIds),
-    // });
-    // const locations = await daoUtils.getList(locationCollection, {
-    //   _id: _.in(locationIds),
-    // });
-
-    // const orderItems = await daoUtils.getList(orderItemCollection, {
-    //   activityId: _.eq(_id)
-    // })
-
-    const [items, locations, orderItems] = await Promise.all([
-      daoUtils.getList(itemCollection, {
-        _id: _.in(itemIds),
-      }),
-      daoUtils.getList(locationCollection, {
-        _id: _.in(locationIds),
-      }),
-      daoUtils.getList(orderItemCollection, {
-        activityId: _.eq(_id),
-      }),
-    ]);
-
-    purchase.items = items;
-    purchase.locations = locations;
-    purchase.orderItems = orderItems;
-
-    return createSuccessResponse(purchase);
+    const { list } = await collection
+      .aggregate()
+      .match({
+        _id,
+      })
+      .lookup({
+        from: "item",
+        localField: "itemIds",
+        foreignField: "_id",
+        as: "items",
+      })
+      .lookup({
+        from: "location",
+        localField: "locationIds",
+        foreignField: "_id",
+        as: "locations",
+      })
+      .lookup({
+        from: "orderItem",
+        localField: "_id",
+        foreignField: "activityId",
+        as: "orderItems",
+      })
+      .end();
+    return createSuccessResponse(list[0]);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -109,11 +99,7 @@ const searchPurchaseByPage = async (event, context) => {
       delete item.orders;
     });
 
-    const dest = {
-      data: list,
-      total,
-    };
-    return createSuccessResponse(dest);
+    return createPageSuccessResponse(list, total);
   } catch (error) {
     console.log(error);
     return createErrorResponse(error);

@@ -5,12 +5,12 @@ exports.createSuccessResponse = (data) => {
   };
 };
 
-exports.createPageSuccessResponse = (data, page) => {
+exports.createPageSuccessResponse = (data, total) => {
   return {
     success: true,
     data: {
       data,
-      page,
+      total,
     },
   };
 };

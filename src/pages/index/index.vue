@@ -71,7 +71,7 @@ export default Vue.extend({
         })
         .then((res) => {
           const { data: activities, total } = res.result.data;
-          console.log(activities);
+          console.log(res);
           this.activities = activities.map((item) => {
             return {
               ...item,
