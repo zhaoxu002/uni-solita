@@ -1,123 +1,142 @@
 <template>
-  <view class="container">
+  <view>
     <div class="head-img-container">
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
     </div>
 
-    <div class="info-container">
-      <div>{{ title }}</div>
-      <div v-if="endTime">{{ formatEndTime }} 结束</div>
-      <button open-type="share">转发</button>
-      <mp-html
-        class="rich-text"
-        :content="description"
-        container-style="word-break:break-all;white-space:pre-wrap;"
-      ></mp-html>
-    </div>
-
-    <div class="good-container">
-      <div class="good" v-for="item of goods" :key="item._id">
-        <img
-          class="good-img"
-          mode="aspectFill"
-          :src="item.defaultImg"
-          alt=""
-          @click="handleCheckDetail(item)"
-        />
-        {{ item.name }}
-        <div class="price">
-          {{ item.price }}
-        </div>
-
-        <div class="origin-price">{{ item.originPrice }}</div>
-        <uni-number-box v-model="item.amount" :min="0" :step="1" />
+    <div class="container">
+      <div class="info-container">
+        <div>{{ title }}</div>
+        <div v-if="endTime">{{ formatEndTime }} 结束</div>
+        <button open-type="share">转发</button>
+        <mp-html
+          class="rich-text"
+          :content="description"
+          container-style="word-break:break-all;white-space:pre-wrap;"
+        ></mp-html>
       </div>
-    </div>
 
-    <div class="record-container">
-      <div class="record" v-for="record of records" :key="record._id">
-        {{ record.userName }} 购买了
-
-        {{ record.itemName }}
-
-        {{ record.itemQuantity }}
-      </div>
-    </div>
-
-    <uni-popup
-      ref="popup"
-      type="bottom"
-      background-color="#fff"
-      @change="handlePopupChange"
-    >
-      <div class="good-detail" v-if="goodDetail">
-        <div class="flex">
-          <image :src="goodDetail.defaultImg" class="image" mode="aspectFill" />
-          <div>
-            <div class="name">{{ goodDetail.name }}</div>
-            <div class="price">{{ goodDetail.price }}</div>
-          </div>
-        </div>
-
-        <div>
-          <uni-number-box v-model="goodDetail.amount" :step="1" />
-        </div>
-
-        <div v-for="(img, index) of goodDetail.images" :key="index">
-          <image class="img-list-item" mode="aspectFit" :src="img" />
-        </div>
-
-        <div class="function">
-          <button @click="handleAddCurrentToCart">加入已选</button>
-        </div>
-      </div>
-    </uni-popup>
-
-    <div v-if="selected.selectedPrice > 0" class="bottom-bar">
-      <div class="bar-content">
-        <div @click="handleShowSelected">
-          总价：{{ selected.selectedPrice }}
-        </div>
-
-        <button class="confirm" type="primary" @click="handleConfirm">
-          下单
-        </button>
-      </div>
-    </div>
-
-    <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
-      <div class="popup-container">
-        <div
-          class="selected-item"
-          v-for="item of selected.selectedGoods"
-          :key="item._id"
-        >
-          <image
+      <div class="good-container">
+        <div class="good" v-for="item of goods" :key="item._id">
+          <img
+            class="good-img"
             mode="aspectFill"
-            class="selected-img"
             :src="item.defaultImg"
+            alt=""
+            @click="handleCheckDetail(item)"
           />
+          <div class="good-info">
+            <div class="name">{{ item.name }}</div>
+            <div class="price">
+              $ {{ item.price }}
+            </div>
+          </div>
+
+
+          <div class="origin-price">{{ item.originPrice }}</div>
+          <uni-number-box
+            v-model="item.amount"
+            :min="0"
+            :step="1"
+            background="#f2828d"
+          />
+        </div>
+      </div>
+
+      <div class="record-container">
+        <div class="record" v-for="record of records" :key="record._id">
+          {{ record.userName }} 购买了
+
+          {{ record.itemName }}
+
+          {{ record.itemQuantity }}
+        </div>
+      </div>
+
+      <uni-popup
+        ref="popup"
+        type="bottom"
+        background-color="#fff"
+        @change="handlePopupChange"
+      >
+        <div class="good-detail" v-if="goodDetail">
+          <div class="flex">
+            <image
+              :src="goodDetail.defaultImg"
+              class="image"
+              mode="aspectFill"
+            />
+            <div>
+              <div class="name">{{ goodDetail.name }}</div>
+              <div class="price">$ {{ goodDetail.price }}</div>
+            </div>
+          </div>
+
           <div>
-            <div>{{ item.name }}</div>
-            <div>{{ item.price }}</div>
-            <div>{{ item.amount }}</div>
+            <uni-number-box
+              v-model="goodDetail.amount"
+              :step="1"
+              :min="0"
+              background="#f2828d"
+            />
+          </div>
+
+          <div v-for="(img, index) of goodDetail.images" :key="index">
+            <image class="img-list-item" mode="aspectFit" :src="img" />
+          </div>
+
+          <div class="function">
+            <button @click="handleAddCurrentToCart">加入已选</button>
           </div>
         </div>
+      </uni-popup>
 
-        <div>总价：{{ selected.selectedPrice }}</div>
+      <div v-if="selected.selectedPrice > 0" class="bottom-bar">
+        <div class="bar-content">
+          <div @click="handleShowSelected">
+            总价：{{ selected.selectedPrice }}
+          </div>
+
+          <button class="confirm" type="primary" @click="handleConfirm">
+            下单
+          </button>
+        </div>
       </div>
-    </uni-popup>
+
+      <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
+        <div class="popup-container">
+          <div
+            class="selected-item"
+            v-for="item of selected.selectedGoods"
+            :key="item._id"
+          >
+            <image
+              mode="aspectFill"
+              class="selected-img"
+              :src="item.defaultImg"
+            />
+            <div>
+              <div>{{ item.name }}</div>
+              <div>{{ item.price }}</div>
+              <div>{{ item.amount }}</div>
+            </div>
+          </div>
+
+          <div>总价：{{ selected.selectedPrice }}</div>
+        </div>
+      </uni-popup>
+    </div>
   </view>
 </template>
 
 <script>
-import backButton from "@/components/backButton.vue";
+// import backButton from "@/components/backButton.vue";
 import store from "@/store/index";
 import formatImage from "@/utils/formatHTMLImage";
 import dayjs from "dayjs";
 
 export default {
-  components: { backButton },
+  // components: { backButton },
   data() {
     return {
       activityId: "",
@@ -268,22 +287,6 @@ export default {
       wx.navigateTo({
         url: "/pages/order/index?id=" + this.activityId,
       });
-      // wx.cloud.callFunction({
-      //   name: 'createOrder',
-      //   data: {
-      //     activityId: this.activityId,
-      //     locationId: '93e4b6a063f81f4901c719636aa37f0b',
-      //     goodList: this.selected.selectedGoods.map(item => {
-      //       return {
-      //         id: item._id,
-      //         amount: item.amount
-      //       }
-      //     }),
-      //     totalPrice: this.selected.selectedPrice,
-      //     phone: 13122020795,
-      //     comment: '评论试试'
-      //   }
-      // })
     },
   },
 };
@@ -292,27 +295,38 @@ export default {
 .head-img-container {
   width: 100vw;
   height: 250px;
-  background-image: linear-gradient(
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 1)
-  );
-  background-size: 100vw 16px;
-  background-position: bottom;
-  background-repeat: no-repeat;
+  /* background-image: linear-gradient(rgba(255, 255, 255, 0), #f7f9fa); */
+  /* background-size: 100vw 16px; */
+  /* background-position: bottom; */
+  /* background-repeat: no-repeat; */
 
   .head-img {
     width: 100vw;
     height: 250px;
-    mix-blend-mode: overlay;
+    position: relative;
+
+    &:after {
+      content: "";
+      height: 16px;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      bottom: 0px;
+      background-image: linear-gradient(rgba(255, 255, 255, 0), #f7f9fa);
+    }
   }
 }
 .container {
-  /* margin-top: 88px; */
+  background: #f7f9fa;
   padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
   padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
 }
 .info-container {
-  padding: 16rpx;
+  margin: 0 32rpx;
+  padding: 16px;
+  border-radius: 4px;
+  background: #fff;
+  transform: translateY(-16px);
 }
 
 .rich-text {
@@ -328,6 +342,8 @@ export default {
 }
 
 .good {
+  background: #fff;
+  border-radius: 4px;
   margin: 16rpx;
   width: 327rpx;
   height: 600rpx;
@@ -397,5 +413,8 @@ export default {
 }
 .price {
   color: $uni-color-primary;
+}
+.good-info {
+  padding: 8px;
 }
 </style>
