@@ -298,10 +298,12 @@ export default {
   );
   background-size: 100vw 16px;
   background-position: bottom;
+  background-repeat: no-repeat;
 
   .head-img {
     width: 100vw;
     height: 250px;
+    mix-blend-mode: overlay;
   }
 }
 .container {
