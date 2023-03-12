@@ -1,7 +1,7 @@
 <template>
   <div>
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
-    <button @click="handleAccount">我的订单</button>
+    <!-- <button @click="handleAccount">我的订单</button> -->
     <view class="container">
       <view
         class="activity"
@@ -16,13 +16,11 @@
             mode="aspectFill"
           />
           <div>
-            <div>{{ item.startTimeFromNow }} 发布</div>
-            <div>
-              {{ item.formatEndTime }}
-            </div>
-            <div>
+            <div class="activity-title">
               {{ item.title }}
             </div>
+            <div class="text">{{ item.startTimeFromNow }} 发布</div>
+            <div class="text">{{ item.formatEndTime }} 结束</div>
           </div>
         </div>
         <div>
@@ -39,9 +37,9 @@
           </div>
         </div>
 
-        <div>
-          <span v-if="(item.endTime * 1000) > now">进行中</span>
-          <span v-else>已结束</span>
+        <div class="status">
+          <span class="active" v-if="item.endTime > now">进行中</span>
+          <span class="disable" v-else>已结束</span>
         </div>
       </view>
 
@@ -91,7 +89,7 @@ export default Vue.extend({
       if (this.loadingStatus === "loading") return;
 
       this.loadingStatus = "loading";
-      wx.cloud
+      uni.cloud
         .callFunction({
           name: "purchase",
           data: {
@@ -105,7 +103,7 @@ export default Vue.extend({
             res.result.data.data.map((item) => {
               return {
                 ...item,
-                formatEndTime: dayjs(item.endTime * 1000).format(
+                formatEndTime: dayjs(item.endTime).format(
                   "YYYY-MM-DD HH:mm:ss"
                 ),
                 startTimeFromNow: dayjs(item.startTime).fromNow(),
@@ -131,17 +129,19 @@ export default Vue.extend({
         })
         .catch(() => {
           this.loadingStatus = "noMore";
-        });
+        }).finally(() => {
+          uni.stopPullDownRefresh()
+        })
     },
 
     handleCheckDetail(id) {
-      wx.navigateTo({
+      uni.navigateTo({
         url: "/pages/activity/index?id=" + id,
       });
     },
 
     handleAccount() {
-      wx.navigateTo({
+      uni.navigateTo({
         url: "/pages/person/index",
       });
     },
@@ -174,6 +174,7 @@ export default Vue.extend({
   .activity-image {
     width: 80px;
     height: 80px;
+    flex-shrink: 0;
     border-radius: 4px;
     margin-right: 8px;
   }
@@ -207,5 +208,33 @@ export default Vue.extend({
 .title {
   font-size: 36rpx;
   color: #8f8f94;
+}
+
+.activity-title {
+  display: -webkit-box;
+  word-break: break-all;
+  text-overflow: ellipsis;
+  font-size: 16px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; //设置 需要显示的行数
+}
+
+.text {
+  font-size: 14px;
+  color: $uni-text-color;
+}
+
+.status {
+  margin-top: 8px;
+  line-height: 1;
+  font-size: 12px;
+
+  .active {
+    color: #65bcbf;
+  }
+  .disable {
+    color: $uni-text-color-disable
+  }
 }
 </style>

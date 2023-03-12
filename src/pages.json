@@ -3,7 +3,7 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "个人专享群接龙",
+        "navigationBarTitleText": "Baby Show",
         "enablePullDownRefresh": true
       }
     },
@@ -28,8 +28,21 @@
   ],
   "globalStyle": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "uni-app",
-    "navigationBarBackgroundColor": "#f2828d",
-    "backgroundColor": "#eee7df"
+    "backgroundColor": "#fff",
+    "navigationBarBackgroundColor": "#fdabb3"
+  },
+  "tabBar": {
+    "color": "#313d53",
+    "selectedColor": "#f88181",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "全部"
+      },
+      {
+        "pagePath": "pages/person/index",
+        "text": "我的"
+      }
+    ]
   }
 }

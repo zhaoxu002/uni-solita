@@ -1,16 +1,25 @@
 <template>
+  <page-meta
+    :page-style="'overflow:' + (pageContainerShow ? 'hidden' : 'visible')"
+  ></page-meta>
+  <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <view>
     <div class="head-img-container">
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
+
+      <button class="share" size="mini" open-type="share">转发</button>
     </div>
 
     <div class="container">
       <div class="info-container">
-        <div>{{ title }}</div>
-        <div v-if="endTime">{{ formatEndTime }} 结束</div>
-        <button open-type="share">转发</button>
+        <div class="title">{{ title }}</div>
+
+        <div v-if="endTime" class="status">{{ formatEndTime }} 结束</div>
         <mp-html
           class="rich-text"
+          :tag-style="{
+            p: 'min-height: 1rem',
+          }"
           :content="description"
           container-style="word-break:break-all;white-space:pre-wrap;"
         ></mp-html>
@@ -55,11 +64,11 @@
         background-color="#fff"
         @change="handlePopupChange"
       >
-        <div class="good-detail" v-if="goodDetail">
-          <div class="flex">
+        <div class="padding-16">
+          <div class="flex margin-bottom-8">
             <image
               :src="goodDetail.defaultImg"
-              class="image"
+              class="good-image"
               mode="aspectFill"
             />
             <div>
@@ -67,35 +76,42 @@
               <div class="price">$ {{ goodDetail.price }}</div>
             </div>
           </div>
-
-          <div>
-            <uni-number-box
-              v-model="goodDetail.amount"
-              :step="1"
-              :min="0"
-              background="#f2828d"
-            />
-          </div>
-
-          <div v-for="(img, index) of goodDetail.images" :key="index">
-            <image class="img-list-item" mode="aspectFit" :src="img" />
-          </div>
-
-          <div class="function">
-            <button @click="handleAddCurrentToCart">加入已选</button>
-          </div>
+          <uni-number-box
+            v-model="goodDetail.amount"
+            :step="1"
+            :min="0"
+            background="#f2828d"
+          />
         </div>
+        <scroll-view scroll-y class="good-detail">
+          <div class="padding-16 margin-bottom-60">
+            <div v-for="(img, index) of goodDetail.images" :key="index">
+              <image class="img-list-item" mode="aspectFit" :src="img" />
+            </div>
+
+            <mp-html
+              class="rich-text"
+              :tag-style="{
+                p: 'min-height: 1rem',
+              }"
+              :content="goodDetail.description"
+              container-style="word-break:break-all;white-space:pre-wrap;"
+            />
+
+            <!-- <div class="function">
+              <button @click="handleAddCurrentToCart">加入已选</button>
+            </div> -->
+          </div>
+        </scroll-view>
       </uni-popup>
 
       <div v-if="selected.selectedPrice > 0" class="bottom-bar">
         <div class="bar-content">
           <div @click="handleShowSelected">
-            总价：{{ selected.selectedPrice }}
+            总价：$ {{ selected.selectedPrice }}
           </div>
 
-          <button class="confirm" type="primary" @click="handleConfirm">
-            下单
-          </button>
+          <div class="confirm" @click="handleConfirm">下单</div>
         </div>
       </div>
 
@@ -126,17 +142,18 @@
 </template>
 
 <script>
-// import backButton from "@/components/backButton.vue";
 import store from "@/store/index";
 import formatImage from "@/utils/formatHTMLImage";
 import dayjs from "dayjs";
+import mpHtml from "@/uni_modules/mp-html/components/mp-html/mp-html.vue";
 
 export default {
-  // components: { backButton },
+  components: { mpHtml },
   data() {
     return {
       activityId: "",
       title: "",
+      now: Date.now(),
       description: "",
       endTime: 0,
       goods: [],
@@ -150,7 +167,7 @@ export default {
 
   computed: {
     formatEndTime() {
-      return dayjs(this.endTime * 1000).format("YYYY-MM-DD HH:mm:ss");
+      return dayjs(this.endTime).format("YYYY-MM-DD HH:mm:ss");
     },
     selected() {
       const selectedGoods = this.goods.filter((item) => item.amount > 0);
@@ -265,11 +282,13 @@ export default {
       this.$refs.popup.close();
     },
     handleCheckDetail(item) {
-      // this.pageContainerShow = true
-      this.$refs.popup.open("bottom");
       this.goodDetail = item;
+
+      this.$refs.popup.open("bottom");
     },
-    handlePopupChange() {},
+    handlePopupChange(e) {
+      this.pageContainerShow = e.show;
+    },
     handleShowSelected() {
       this.$refs.selectedPopup.open("bottom");
     },
@@ -291,10 +310,19 @@ export default {
 .head-img-container {
   width: 100vw;
   height: 250px;
+  position: relative;
   /* background-image: linear-gradient(rgba(255, 255, 255, 0), #f7f9fa); */
   /* background-size: 100vw 16px; */
   /* background-position: bottom; */
   /* background-repeat: no-repeat; */
+
+  .share {
+    position: absolute;
+    bottom: 32px;
+    right: 16px;
+    height: 24px;
+    line-height: 22px;
+  }
 
   .head-img {
     width: 100vw;
@@ -323,6 +351,12 @@ export default {
   border-radius: 4px;
   background: #fff;
   transform: translateY(-16px);
+
+  .title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
 }
 
 .rich-text {
@@ -357,14 +391,28 @@ export default {
   display: flex;
 }
 
-.good-detail {
-  padding: 16px;
-  border-radius: 16px;
+.margin-bottom-8 {
+  margin-bottom: 8px;
+}
 
-  .image {
-    width: 80px;
-    height: 80px;
-  }
+.padding-16 {
+  padding: 16px;
+}
+.margin-bottom-60 {
+  margin-bottom: 60px;
+}
+.good-image {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+.good-detail {
+  border-radius: 16px;
+  max-height: calc(80vh - 100px);
+  width: 100vw;
 
   .img-list-item {
     width: 100%;
@@ -382,6 +430,7 @@ export default {
   bottom: 0;
   width: 100vw;
   background: #fff;
+  z-index: 10000;
 
   .bar-content {
     height: 54px;
@@ -398,11 +447,15 @@ export default {
     width: 60vw;
     margin: 0;
     line-height: 40px;
+    background: #f88181;
+    border: none;
+    color: #fff;
+    text-align: center;
   }
 }
 
 .record-container {
-  margin-bottom: 66px;
+  padding-bottom: 66px;
 }
 
 .popup-container {
