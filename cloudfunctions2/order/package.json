@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "wx-server-sdk": "latest",
-    "nanoid": "3.3.4"
+    "nanoid": "3.3.4",
+    "node-xlsx": "0.18.0"
   }
 }
+

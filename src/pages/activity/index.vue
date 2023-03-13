@@ -8,7 +8,9 @@
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
 
       <button class="share" size="mini" open-type="share">转发</button>
-      <button v-if="isAdmin" class="export" size="mini" @click="handleExport">导出订单信息</button>
+      <button v-if="isAdmin" class="export" size="mini" @click="handleExport">
+        导出订单信息
+      </button>
     </div>
 
     <div class="container">
@@ -207,8 +209,8 @@ export default {
   onLoad(options) {
     const { id } = options;
 
-    this.fetch(id)
-    this.checkIsAdmin()
+    this.fetch(id);
+    this.checkIsAdmin();
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
@@ -248,62 +250,64 @@ export default {
   methods: {
     fetch(id) {
       wx.cloud
-      .callFunction({
-        name: "purchase",
-        data: {
-          method: "getOne",
-          _id: id,
-        },
-      })
-      .then((res) => {
-        console.log(res.result.data);
-        const {
-          description,
-          title,
-          items,
-          locations,
-          endTime,
-          orderList,
-          headImages,
-        } = res.result.data;
+        .callFunction({
+          name: "purchase",
+          data: {
+            method: "getOne",
+            _id: id,
+          },
+        })
+        .then((res) => {
+          console.log(res.result.data);
+          const {
+            description,
+            title,
+            items,
+            locations,
+            endTime,
+            orderList,
+            headImages,
+          } = res.result.data;
 
-        this.activityId = id;
-        this.endTime = endTime;
-        this.description = formatImage(description);
-        this.title = title;
-        this.goods = [
-          ...items.filter(i => i.recommend === true),
-          ...items.filter(i => !i.recommend)
-        ].map((item) => {
-          return {
-            ...item,
-            amount: 0,
-          };
+          this.activityId = id;
+          this.endTime = endTime;
+          this.description = formatImage(description);
+          this.title = title;
+          this.goods = [
+            ...items.filter((i) => i.recommend === true),
+            ...items.filter((i) => !i.recommend),
+          ].map((item) => {
+            return {
+              ...item,
+              amount: 0,
+            };
+          });
+          this.records = orderList.map((order) => {
+            return {
+              ...order,
+              createTimeFromNow: dayjs(order.createTime).fromNow(),
+              userName: order.userName
+                .split("")
+                .map((s, index, arr) => {
+                  if (index === arr.length - 1) return s;
+                  return "*";
+                })
+                .join(""),
+            };
+          });
+          this.headImages = headImages;
+          store.commit("updateLocationList", locations);
         });
-        this.records = orderList.map((order) => {
-          return {
-            ...order,
-            createTimeFromNow: dayjs(order.createTime).fromNow(),
-            userName: order.userName
-              .split("")
-              .map((s, index, arr) => {
-                if (index === arr.length - 1) return s;
-                return "*";
-              })
-              .join(""),
-          };
-        });
-        this.headImages = headImages;
-        store.commit("updateLocationList", locations);
-      });
     },
     checkIsAdmin() {
-      wx.cloud.callFunction({
-        name: 'checkIsAdmin'
-      }).then(res => {
-        console.log(res)
-        this.isAdmin = res.result.isAdmin
-      })
+      wx.cloud
+        .callFunction({
+          name: "checkIsAdmin",
+        })
+        .then((res) => {
+          console.log(res);
+          this.isAdmin = res.result.isAdmin;
+        });
     },
     handleAddCurrentToCart() {
       if (this.isActivityEnd) {
@@ -362,10 +366,36 @@ export default {
     },
 
     handleExport() {
-      // wx.cloud.callFunction({
-
-      // })
-    }
+      // TODO
+      wx.cloud
+        .callFunction({
+          name: "order",
+          data: {
+            method: "exportExcel",
+            purchaseId: this.activityId,
+          },
+        })
+        .then((res) => {
+          const { fileID } = res.result.data;
+          console.log(fileID);
+          wx.cloud.downloadFile({
+            fileID, // 文件 ID
+            success: (res) => {
+              const filePath = res.tempFilePath;
+              wx.saveFileToDisk({
+                filePath,
+                success(res) {
+                  console.log(res);
+                },
+                fail(res) {
+                  console.error(res);
+                },
+              });
+            },
+            fail: console.error,
+          });
+        });
+    },
   },
 };
 </script>

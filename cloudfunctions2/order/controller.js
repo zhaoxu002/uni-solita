@@ -1,5 +1,7 @@
 const cloud = require("wx-server-sdk");
 const { nanoid } = require("nanoid");
+const xlsx = require("node-xlsx");
+const getItemDescription = require("./utils/getItemDescription");
 const daoUtils = require("./utils/daoUtil");
 const { Order, OrderItem } = require("./orderVo");
 const {
@@ -285,6 +287,93 @@ const cancelOrderBySn = async (event, context) => {
   }
 };
 
+const exportOrdersByPurchaseId = async (event, context) => {
+  const { _id } = event;
+  const { list } = await orderCollection
+    .aggregate()
+    .match({
+      purchaseId: _id,
+      isDelete: _.not(_.eq(true)),
+    })
+    .sort({
+      detailAddress: -1,
+      createTime: -1,
+    })
+    .lookup({
+      from: "orderItem",
+      localField: "sn",
+      foreignField: "orderSn",
+      as: "orderItems",
+    })
+    .lookup({
+      from: "purchase",
+      localField: "purchaseId",
+      foreignField: "_id",
+      as: "purchase",
+    })
+    .end();
+  const title = [
+    "接龙名称",
+    "买家昵称",
+    "买家手机",
+    "商品*数量",
+    "总价",
+    "自提点",
+  ];
+  let addressMapXlsxBody = new Map();
+  let purchaseTitle = "";
+  for (let order of list) {
+    const {
+      purchase,
+      userName,
+      userPhone,
+      orderItems,
+      totalAmount,
+      detailAddress,
+    } = order;
+    const curPurchaseTitle = purchase[0].title;
+    if (!purchaseTitle) {
+      purchaseTitle = curPurchaseTitle;
+    }
+    const curOrderDesc = [
+      curPurchaseTitle,
+      userName,
+      userPhone,
+      getItemDescription(orderItems),
+      totalAmount,
+      detailAddress,
+    ];
+    if (addressMapXlsxBody.has(detailAddress)) {
+      addressMapXlsxBody.get(detailAddress).push(curOrderDesc);
+    } else {
+      addressMapXlsxBody.set(detailAddress, [curOrderDesc]);
+    }
+  }
+
+  const excelContent = Array.from(addressMapXlsxBody.entries()).map(
+    ([address, sheetContent]) => {
+      sheetContent.unshift(title);
+      return {
+        name: address.substring(0, 16),
+        data: sheetContent,
+      };
+    }
+  );
+
+  try {
+    let buffer = await xlsx.build(excelContent);
+
+    const { fileID } = await cloud.uploadFile({
+      cloudPath: `${purchaseTitle}-${Date.now()}.xlsx`,
+      fileContent: buffer,
+    });
+
+    return createSuccessResponse({ fileID });
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
 module.exports = {
   searchOrderBySn,
   searchOrderByUserOpenIdAndPage,
@@ -293,4 +382,5 @@ module.exports = {
   deleteOrderBySn,
   cancelOrderBySn,
   createOrder,
+  exportOrdersByPurchaseId,
 };

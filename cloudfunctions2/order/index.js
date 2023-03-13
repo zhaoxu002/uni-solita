@@ -6,23 +6,26 @@ const {
   deleteOrderBySn,
   cancelOrderBySn,
   createOrder,
-} = require('./controller');
+  exportOrdersByPurchaseId,
+} = require("./controller");
 
 exports.main = async (event, context) => {
   switch (event.method) {
-    case 'getOneBySn':
+    case "getOneBySn":
       return await searchOrderBySn(event, context);
-    case 'getListByUserOpenIdAndPage':
+    case "getListByUserOpenIdAndPage":
       return await searchOrderByUserOpenIdAndPage(event, context);
-    case 'getListByPage':
+    case "getListByPage":
       return await searchOrderByPage(event, context);
-    case 'removeOneBySn':
+    case "removeOneBySn":
       return await removeOrderBySn(event, context);
-    case 'deleteOneBySn':
+    case "deleteOneBySn":
       return await deleteOrderBySn(event, context);
-    case 'createOne':
+    case "createOne":
       return await createOrder(event, context);
-    case 'cancelOrderBySn':
+    case "cancelOrderBySn":
       return await cancelOrderBySn(event, context);
+    case "exportExcel":
+      return await exportOrdersByPurchaseId(event, context);
   }
 };
