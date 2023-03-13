@@ -26,9 +26,9 @@
         <div>
           <div v-for="order of item.orderList" :key="order._id" class="order">
             <div>
-              <span>{{ order.userName }} &nbsp;</span>
+              <span :style="{ marginRight: '4px' }">{{ order.userName }}</span>
               <!-- TODO: -->
-              <span>&nbsp;{{ order.createTimeFromNow }} 购买了</span>
+              <span> {{ order.createTimeFromNow }}购买了</span>
             </div>
             <div>
               <span>{{ order.itemTitle }}</span>
@@ -107,10 +107,17 @@ export default Vue.extend({
                   "YYYY-MM-DD HH:mm:ss"
                 ),
                 startTimeFromNow: dayjs(item.startTime).fromNow(),
-                orderList: item.orderList.map((order) => {
+                orderList: item.orderList.slice(0, 5).map((order) => {
                   return {
                     ...order,
                     createTimeFromNow: dayjs(order.createTime).fromNow(),
+                    userName: order.userName
+                      .split("")
+                      .map((s, index, arr) => {
+                        if (index === arr.length - 1) return s;
+                        return "*";
+                      })
+                      .join(""),
                   };
                 }),
               };
@@ -129,9 +136,10 @@ export default Vue.extend({
         })
         .catch(() => {
           this.loadingStatus = "noMore";
-        }).finally(() => {
-          uni.stopPullDownRefresh()
         })
+        .finally(() => {
+          uni.stopPullDownRefresh();
+        });
     },
 
     handleCheckDetail(id) {
@@ -234,7 +242,7 @@ export default Vue.extend({
     color: #65bcbf;
   }
   .disable {
-    color: $uni-text-color-disable
+    color: $uni-text-color-disable;
   }
 }
 </style>

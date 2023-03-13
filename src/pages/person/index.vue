@@ -2,11 +2,9 @@
   <div class="container">
     <!-- <back-button /> -->
 
-    <div class="header">标题</div>
-
     <div class="activity-list">
       <div class="card" v-for="item of list" :key="item._id">
-        <div class="name">
+        <div class="name" @click="handleCheckActivity(item.purchaseId)">
           {{ item.purchaseTitle }}
         </div>
 
@@ -15,8 +13,6 @@
             <div>
               <div class="secondary">下单时间：{{ item.createTime }}</div>
             </div>
-
-            <!-- <div class="color">待支付</div> -->
           </div>
 
           <div
@@ -31,19 +27,25 @@
             ></image>
 
             <div class="item-desc">
-              <div>
+              <div class="item-name">
                 {{ good.itemName }}
               </div>
 
-              <div>
-                <div>价格：${{ good.itemPrice }}</div>
+              <div class="item-detail-wrapper">
+                <div class="item-detail">
+                  价格：
+                  <span> ${{ good.itemPrice }} </span>
+                </div>
 
-                <div>数量：{{ good.itemQuantity }}</div>
+                <div class="item-detail">数量：{{ good.itemQuantity }}</div>
               </div>
             </div>
           </div>
 
-          <div class="right">总金额：${{ item.totalAmount }}</div>
+          <div class="right font14">
+            总金额：
+            <span class="price">${{ item.totalAmount }}</span>
+          </div>
 
           <div class="info">
             <div class="flex">
@@ -57,6 +59,11 @@
             <div class="flex">
               <div class="title">电话号码：</div>
               <div class="content">{{ item.userPhone }}</div>
+            </div>
+
+            <div class="flex">
+              <div class="title">备注：</div>
+              <div class="content">{{ item.note }}</div>
             </div>
           </div>
         </div>
@@ -83,6 +90,10 @@ export default {
     this.handleFetch();
   },
 
+  onReachBottom() {
+    this.handleFetch();
+  },
+
   methods: {
     handleFetch() {
       if (this.loadingStatus === "loading") return;
@@ -95,8 +106,8 @@ export default {
           data: {
             method: "getListByUserOpenIdAndPage",
             pageQuery: {
-              curPage: 1,
-              limit: 10,
+              curPage: this.current,
+              limit: this.pageSize,
             },
           },
         })
@@ -127,11 +138,19 @@ export default {
           this.loadingStatus = "noMore";
         });
     },
+
+    handleCheckActivity(id) {
+      uni.navigateTo({
+        url: "/pages/activity/index?id=" + id,
+      });
+    },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+$price: #f5222d;
+
 .container {
   padding: 16px;
   /* margin-top: 88px; */
@@ -148,6 +167,14 @@ export default {
   margin-bottom: 16px;
 
   .name {
+    display: -webkit-box;
+    word-break: break-all;
+    text-overflow: ellipsis;
+    font-size: 16px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; //设置 需要显示的行数
+    margin-bottom: 8px;
   }
 
   .item-info {
@@ -160,12 +187,23 @@ export default {
       height: 40px;
       border-radius: 4px;
       margin-right: 8px;
+      flex-shrink: 0;
     }
 
     .item-desc {
       display: flex;
       flex-grow: 1;
       justify-content: space-between;
+
+      .item-name {
+        display: -webkit-box;
+        word-break: break-all;
+        text-overflow: ellipsis;
+        font-size: 14px;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2; //设置 需要显示的行数
+      }
     }
   }
 }
@@ -181,21 +219,38 @@ export default {
   .secondary {
     font-size: 12px;
     color: $uni-text-color-grey;
+    margin-bottom: 8px;
   }
-  .color {
-  }
+
   .right {
     text-align: end;
   }
   .info {
     margin-top: 8px;
+    font-size: 14px;
     .title {
       text-align: end;
       color: $uni-text-color-grey;
+      width: 70px;
+      flex-shrink: 0;
     }
     .content {
       color: $uni-text-color-grey;
     }
   }
+}
+.item-detail-wrapper {
+  width: 100px;
+  flex-shrink: 0;
+  text-align: right;
+  .item-detail {
+    font-size: 12px;
+  }
+}
+.price {
+  color: $price;
+}
+.font14 {
+  font-size: 14px;
 }
 </style>

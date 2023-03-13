@@ -3,11 +3,11 @@
     <div class="card">
       <uni-forms :model="formData" ref="form">
         <uni-forms-item label="提货点" name="locationId" required>
-          <uni-data-select
+          <uni-data-picker
             v-model="formData.locationId"
             :localdata="locationList"
             required
-          ></uni-data-select>
+          ></uni-data-picker>
         </uni-forms-item>
 
         <uni-forms-item label="昵称" name="userName" required>
@@ -34,13 +34,15 @@
         <img :src="item.defaultImg" class="image" mode="aspectFill" />
 
         <div class="info">
-          <div>
+          <div class="name">
             {{ item.name }}
           </div>
 
           <div>数量：{{ item.amount }}</div>
 
-          <div>单价：$ {{ item.price }}</div>
+          <div>单价：
+            <span class="price">$ {{ item.price }}</span>
+          </div>
         </div>
       </div>
 
@@ -48,7 +50,7 @@
     </div>
 
     <div class="bottom-fixed">
-      <button @click="handleConfirm">提交接龙</button>
+      <button class="button" @click="handleConfirm">提交接龙</button>
     </div>
   </div>
 </template>
@@ -169,15 +171,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$price: #f5222d;
+
 .container {
   padding: 16px;
+  background: #f7f9fa;
+  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
+}
+.card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.bottom-fixed {
+  box-sizing: border-box;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  left: 0;
+  padding: 16px;
+  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
+  background: #fff;
+  display: flex;
+
+  .button {
+    flex-grow: 1;
+    margin-bottom: 16px;
+  }
 }
 .item {
   display: flex;
+  margin-bottom: 8px;
 }
 .image {
   width: 80px;
   height: 80px;
+  margin-right: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 #nickname-input {
   font-size: 14px;
@@ -197,5 +231,21 @@ export default {
   font-size: 14px;
   height: 35px;
   padding-left: 10px;
+}
+.info {
+  font-size: 12px;
+
+  .name {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+}
+.price {
+  color: $price;
+}
+</style>
+<style>
+.uni-forms-item__content {
+  overflow: hidden;
 }
 </style>

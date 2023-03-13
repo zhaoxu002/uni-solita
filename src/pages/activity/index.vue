@@ -49,12 +49,33 @@
       </div>
 
       <div class="record-container">
-        <div class="record" v-for="record of records" :key="record._id">
-          {{ record.userName }} 购买了
+        <div v-for="order of records" :key="order._id" class="order">
+          <div>
+            <span :style="{ marginRight: '4px' }">{{ order.userName }}</span>
+            <!-- TODO: -->
+            <span> {{ order.createTimeFromNow }}购买了</span>
+          </div>
+          <div>
+            <span>{{ order.itemTitle }}</span>
+            <span>&nbsp;+{{ order.itemQuantity }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="space"></div>
+      <div v-if="selected.selectedPrice > 0" class="bottom-bar">
+        <div class="bar-content">
+          <div @click="handleShowSelected">
+            总价：
+            <span class="price">$ {{ selected.selectedPrice }}</span>
+          </div>
 
-          {{ record.itemName }}
-
-          {{ record.itemQuantity }}
+          <div
+            class="confirm"
+            :class="isActivityEnd && 'end'"
+            @click="handleConfirm"
+          >
+            下单
+          </div>
         </div>
       </div>
 
@@ -97,23 +118,9 @@
               :content="goodDetail.description"
               container-style="word-break:break-all;white-space:pre-wrap;"
             />
-
-            <!-- <div class="function">
-              <button @click="handleAddCurrentToCart">加入已选</button>
-            </div> -->
           </div>
         </scroll-view>
       </uni-popup>
-
-      <div v-if="selected.selectedPrice > 0" class="bottom-bar">
-        <div class="bar-content">
-          <div @click="handleShowSelected">
-            总价：$ {{ selected.selectedPrice }}
-          </div>
-
-          <div class="confirm" @click="handleConfirm">下单</div>
-        </div>
-      </div>
 
       <uni-popup ref="selectedPopup" type="bottom" background-color="#fff">
         <div class="popup-container">
@@ -122,19 +129,21 @@
             v-for="item of selected.selectedGoods"
             :key="item._id"
           >
-            <image
-              mode="aspectFill"
-              class="selected-img"
-              :src="item.defaultImg"
-            />
-            <div>
-              <div>{{ item.name }}</div>
-              <div>{{ item.price }}</div>
-              <div>{{ item.amount }}</div>
+            <img :src="item.defaultImg" class="image" mode="aspectFill" />
+
+            <div class="info">
+              <div class="name">
+                {{ item.name }}
+              </div>
+
+              <div>数量：{{ item.amount }}</div>
+
+              <div>
+                单价：
+                <span class="price">$ {{ item.price }}</span>
+              </div>
             </div>
           </div>
-
-          <div>总价：{{ selected.selectedPrice }}</div>
         </div>
       </uni-popup>
     </div>
@@ -184,6 +193,10 @@ export default {
     cart() {
       return store.state.cart;
     },
+
+    isActivityEnd() {
+      return this.endTime < this.now;
+    },
   },
   /**
    * 生命周期函数--监听页面加载
@@ -207,7 +220,7 @@ export default {
           items,
           locations,
           endTime,
-          orderItems,
+          orderList,
           headImages,
         } = res.result.data;
 
@@ -221,7 +234,19 @@ export default {
             amount: 0,
           };
         });
-        this.records = orderItems;
+        this.records = orderList.map((order) => {
+          return {
+            ...order,
+            createTimeFromNow: dayjs(order.createTime).fromNow(),
+            userName: order.userName
+              .split("")
+              .map((s, index, arr) => {
+                if (index === arr.length - 1) return s;
+                return "*";
+              })
+              .join(""),
+          };
+        });
         this.headImages = headImages;
         store.commit("updateLocationList", locations);
       });
@@ -267,6 +292,15 @@ export default {
   },
   methods: {
     handleAddCurrentToCart() {
+      if (this.isActivityEnd) {
+        uni.showToast({
+          title: "该活动已结束",
+          icon: "error",
+          duration: 2000,
+        });
+        return;
+      }
+
       const newGoods = this.goods.map((item) => {
         if (item._id === this.goodDetail._id) {
           return {
@@ -294,12 +328,21 @@ export default {
     },
 
     handleConfirm() {
+      if (this.isActivityEnd) {
+        uni.showToast({
+          title: "该活动已结束",
+          icon: "error",
+          duration: 2000,
+        });
+        return;
+      }
+
       store.commit("updateCart", {
         activityId: this.activityId,
         goods: this.selected.selectedGoods,
       });
 
-      wx.navigateTo({
+      uni.navigateTo({
         url: "/pages/order/index?id=" + this.activityId,
       });
     },
@@ -307,6 +350,8 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+$price: #f5222d;
+
 .head-img-container {
   width: 100vw;
   height: 250px;
@@ -346,7 +391,7 @@ export default {
   padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
 }
 .info-container {
-  margin: 0 32rpx;
+  margin: 0 16px;
   padding: 16px;
   border-radius: 4px;
   background: #fff;
@@ -367,19 +412,32 @@ export default {
 }
 
 .good-container {
-  display: flex;
-  padding: 16rpx;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 16px;
+  grid-auto-rows: minmax(100px, auto);
 }
 
 .good {
   background: #fff;
   border-radius: 4px;
-  margin: 16rpx;
-  width: 327rpx;
+  /* margin: 16rpx;
+  width: 327rpx; */
   /* height: 600rpx; */
   padding-bottom: 8px;
   border-radius: 8px;
   overflow: hidden;
+
+  .name {
+    display: -webkit-box;
+    word-break: break-all;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; //设置 需要显示的行数
+  }
 }
 
 .good-img {
@@ -451,30 +509,59 @@ export default {
     border: none;
     color: #fff;
     text-align: center;
+
+    &.end {
+      background: $uni-text-color-disable;
+    }
   }
 }
 
 .record-container {
-  padding-bottom: 66px;
+  margin: 0 16px;
+  padding: 16px;
+  border-radius: 4px;
+  background: #fff;
 }
 
 .popup-container {
   padding: 16px;
+  padding-bottom: 70px;
 }
 .selected-item {
   display: flex;
+  margin-bottom: 8px;
 
-  .selected-img {
-    width: 60px;
-    height: 60px;
+  .image {
+    width: 80px;
+    height: 80px;
     margin-right: 8px;
     border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .info {
+    font-size: 12px;
+
+    .name {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
   }
 }
+.space {
+  height: 66px;
+}
 .price {
-  color: $uni-color-primary;
+  color: $price;
 }
 .good-info {
   padding: 8px;
+}
+.order {
+  font-size: 14px;
+  display: flex;
+  color: $uni-text-color-grey;
+  line-height: 1.8;
+  justify-content: space-between;
 }
 </style>

@@ -40,10 +40,25 @@ const searchPurchaseById = async (event, context) => {
         from: "orderItem",
         localField: "_id",
         foreignField: "activityId",
-        as: "orderItems",
+        as: "orderList",
+      })
+      .lookup({
+        from: "order",
+        localField: "_id",
+        foreignField: "purchaseId",
+        as: "orders",
       })
       .end();
-    return createSuccessResponse(list[0]);
+    const [item] = list;
+    const { orders, orderList } = item;
+    orderList.forEach((orderItem) => {
+      const { orderSn } = orderItem;
+      let order = orders.find((order) => order.sn === orderSn);
+      orderItem = Object.assign(orderItem, order);
+    });
+    delete item.orders;
+
+    return createSuccessResponse(item);
   } catch (error) {
     return createErrorResponse(error);
   }

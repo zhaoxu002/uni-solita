@@ -21,6 +21,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ***
 <br/>
 
+app_secret: 250c58ea5dd3fd34f87c4aa975202773
+
 
 # C端功能
 ## 主页
