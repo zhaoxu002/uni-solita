@@ -8,7 +8,7 @@
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
 
       <button class="share" size="mini" open-type="share">转发</button>
-      <button class="export" size="mini" @click="handleExport">导出订单信息</button>
+      <button v-if="isAdmin" class="export" size="mini" @click="handleExport">导出订单信息</button>
     </div>
 
     <div class="container">
@@ -381,6 +381,14 @@ $price: #f5222d;
     position: absolute;
     bottom: 32px;
     right: 16px;
+    height: 24px;
+    line-height: 22px;
+  }
+
+  .export {
+    position: absolute;
+    bottom: 32px;
+    right: 80px;
     height: 24px;
     line-height: 22px;
   }
