@@ -66,7 +66,7 @@
       <div class="space"></div>
       <div v-if="selected.selectedPrice > 0" class="bottom-bar">
         <div class="bar-content">
-          <div @click="handleShowSelected">
+          <div @click="handleShowSelected" class="font14">
             总价：
             <span class="price">$ {{ selected.selectedPrice }}</span>
           </div>
@@ -381,16 +381,12 @@ $price: #f5222d;
     position: absolute;
     bottom: 32px;
     right: 16px;
-    height: 24px;
-    line-height: 22px;
   }
 
   .export {
     position: absolute;
     bottom: 32px;
     right: 80px;
-    height: 24px;
-    line-height: 22px;
   }
 
   .head-img {
@@ -601,5 +597,8 @@ $price: #f5222d;
   color: $uni-text-color-grey;
   line-height: 1.8;
   justify-content: space-between;
+}
+.font14 {
+  font-size: 14px;
 }
 </style>
