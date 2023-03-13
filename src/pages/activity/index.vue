@@ -8,6 +8,7 @@
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
 
       <button class="share" size="mini" open-type="share">转发</button>
+      <button class="export" size="mini" @click="handleExport">导出订单信息</button>
     </div>
 
     <div class="container">
@@ -34,6 +35,7 @@
             alt=""
             @click="handleCheckDetail(item)"
           />
+          <div class="recommend" v-if="item.recommend">推荐</div>
           <div class="good-info">
             <div class="name">{{ item.name }}</div>
             <div class="price">$ {{ item.price }}</div>
@@ -168,6 +170,7 @@ export default {
       goods: [],
       records: [],
       headImages: [],
+      isAdmin: false,
 
       pageContainerShow: false,
       goodDetail: null,
@@ -204,56 +207,8 @@ export default {
   onLoad(options) {
     const { id } = options;
 
-    wx.cloud
-      .callFunction({
-        name: "purchase",
-        data: {
-          method: "getOne",
-          _id: id,
-        },
-      })
-      .then((res) => {
-        console.log(res.result.data);
-        const {
-          description,
-          title,
-          items,
-          locations,
-          endTime,
-          orderList,
-          headImages,
-        } = res.result.data;
-
-        this.activityId = id;
-        this.endTime = endTime;
-        this.description = formatImage(description);
-        this.title = title;
-        this.goods = items.map((item) => {
-          return {
-            ...item,
-            amount: 0,
-          };
-        });
-        this.records = orderList.map((order) => {
-          return {
-            ...order,
-            createTimeFromNow: dayjs(order.createTime).fromNow(),
-            userName: order.userName
-              .split("")
-              .map((s, index, arr) => {
-                if (index === arr.length - 1) return s;
-                return "*";
-              })
-              .join(""),
-          };
-        });
-        this.headImages = headImages;
-        store.commit("updateLocationList", locations);
-      });
-
-    // wx.cloud.callFunction({
-
-    // })
+    this.fetch(id)
+    this.checkIsAdmin()
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
@@ -286,11 +241,70 @@ export default {
    */
   onShareAppMessage() {
     return {
-      title: "带带go",
+      title: "Baby Show",
       path: "/pages/activity/index?id=" + this.activityId,
     };
   },
   methods: {
+    fetch(id) {
+      wx.cloud
+      .callFunction({
+        name: "purchase",
+        data: {
+          method: "getOne",
+          _id: id,
+        },
+      })
+      .then((res) => {
+        console.log(res.result.data);
+        const {
+          description,
+          title,
+          items,
+          locations,
+          endTime,
+          orderList,
+          headImages,
+        } = res.result.data;
+
+        this.activityId = id;
+        this.endTime = endTime;
+        this.description = formatImage(description);
+        this.title = title;
+        this.goods = [
+          ...items.filter(i => i.recommend === true),
+          ...items.filter(i => !i.recommend)
+        ].map((item) => {
+          return {
+            ...item,
+            amount: 0,
+          };
+        });
+        this.records = orderList.map((order) => {
+          return {
+            ...order,
+            createTimeFromNow: dayjs(order.createTime).fromNow(),
+            userName: order.userName
+              .split("")
+              .map((s, index, arr) => {
+                if (index === arr.length - 1) return s;
+                return "*";
+              })
+              .join(""),
+          };
+        });
+        this.headImages = headImages;
+        store.commit("updateLocationList", locations);
+      });
+    },
+    checkIsAdmin() {
+      wx.cloud.callFunction({
+        name: 'checkIsAdmin'
+      }).then(res => {
+        console.log(res)
+        this.isAdmin = res.result.isAdmin
+      })
+    },
     handleAddCurrentToCart() {
       if (this.isActivityEnd) {
         uni.showToast({
@@ -346,6 +360,12 @@ export default {
         url: "/pages/order/index?id=" + this.activityId,
       });
     },
+
+    handleExport() {
+      // wx.cloud.callFunction({
+
+      // })
+    }
   },
 };
 </script>
@@ -356,10 +376,6 @@ $price: #f5222d;
   width: 100vw;
   height: 250px;
   position: relative;
-  /* background-image: linear-gradient(rgba(255, 255, 255, 0), #f7f9fa); */
-  /* background-size: 100vw 16px; */
-  /* background-position: bottom; */
-  /* background-repeat: no-repeat; */
 
   .share {
     position: absolute;
@@ -428,6 +444,20 @@ $price: #f5222d;
   padding-bottom: 8px;
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
+
+  .recommend {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 16px;
+    font-size: 12px;
+    padding: 0 4px;
+    line-height: 16px;
+    border-bottom-right-radius: 4px;
+    color: #fff;
+    background: #f88181;
+  }
 
   .name {
     display: -webkit-box;
