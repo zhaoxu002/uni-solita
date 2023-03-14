@@ -40,7 +40,8 @@
 
           <div>数量：{{ item.amount }}</div>
 
-          <div>单价：
+          <div>
+            单价：
             <span class="price">$ {{ item.price }}</span>
           </div>
         </div>
@@ -50,7 +51,9 @@
     </div>
 
     <div class="bottom-fixed">
-      <button class="button" @click="handleConfirm">提交接龙</button>
+      <button :disabled="loading" class="button" @click="handleConfirm">
+        提交接龙
+      </button>
     </div>
   </div>
 </template>
@@ -74,6 +77,8 @@ export default {
           required: true,
         },
       ],
+      rules: [],
+      loading: false,
     };
   },
 
@@ -106,6 +111,8 @@ export default {
 
   methods: {
     handleConfirm() {
+      if (this.loading) return;
+      this.loading = true;
       uni
         .createSelectorQuery()
         .in(this) // 注意这里要加上 in(this)
@@ -113,58 +120,71 @@ export default {
         .fields({
           properties: ["value"],
         })
-        .exec((res) => {
-          const nickName = res?.[0]?.value;
-          console.log("nickName", nickName);
+        .exec((response) => {
+          const nickName = response?.[0]?.value;
 
-          this.$refs.form.validate().then((res) => {
-            console.log("res", res);
-            const data = {
-              purchaseId: this.id,
-              userPhone: res.userPhone,
-              userName: nickName,
-              note: res.note,
-              locationId: res.locationId,
-              detailAddress: this.locationList.find(
-                (item) => item.value === res.locationId
-              )["detailAddress"],
-              itemsInfo: this.cart.goods.map((item) => {
-                return {
-                  itemId: item._id,
-                  itemQuantity: item.amount,
-                };
-              }),
-            };
+          this.$refs.form
+            .validate()
+            .then((res) => {
+              console.log("res", res);
+              const data = {
+                purchaseId: this.id,
+                userPhone: res.userPhone,
+                userName: nickName,
+                note: res.note,
+                locationId: res.locationId,
+                detailAddress: this.locationList.find(
+                  (item) => item.value === res.locationId
+                )["detailAddress"],
+                itemsInfo: this.cart.goods.map((item) => {
+                  return {
+                    itemId: item._id,
+                    itemQuantity: item.amount,
+                  };
+                }),
+              };
 
-            console.log("data", data);
+              console.log("data", data);
 
-            wx.cloud
-              .callFunction({
-                name: "order",
-                data: {
-                  method: "createOne",
-                  data,
-                },
-              })
-              .then((res) => {
-                console.log("success", res);
+              wx.cloud
+                .callFunction({
+                  name: "order",
+                  data: {
+                    method: "createOne",
+                    data,
+                  },
+                })
+                .then((res) => {
+                  console.log("success", res);
 
-                wx.redirectTo({
-                  url: "/pages/person/index",
+                  wx.switchTab({
+                    url: "/pages/person/index",
+                  });
+                })
+                .catch((err) => {
+                  wx.showToast({
+                    title: "Whoops 出错了",
+                    icon: "error",
+                  });
                 });
-              })
-              .catch((err) => {
-                alert("Whoops 出错了");
+            })
+            .catch((e) => {
+              console.log("form", e);
+              uni.showModal({
+                title: "出错了",
+                content: "请检查表单填写是否完整",
+                showCancel: false,
               });
-          });
+            })
+            .finally(() => {
+              this.loading = false;
+            });
         });
     },
 
     handleInput(e) {
-      // console.log(e);
       this.input = e.detail.value;
       this.$refs.input.setValue(e.detail.value);
-      // this.formData.userName = e.detail.value
     },
   },
 };

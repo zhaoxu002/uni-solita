@@ -50,15 +50,25 @@ const searchPurchaseById = async (event, context) => {
       })
       .end();
     const [item] = list;
-    const { orders, orderList } = item;
-    orderList.forEach((orderItem) => {
-      const { orderSn } = orderItem;
-      let order = orders.find((order) => order.sn === orderSn);
-      orderItem = Object.assign(orderItem, order);
-    });
-    delete item.orders;
+    const { orders, orderList, ...rest } = item;
 
-    return createSuccessResponse(item);
+    const res = {
+      ...rest,
+      orderList: orderList
+        .map((orderItem) => {
+          const { orderSn } = orderItem;
+          let order = orders.find((order) => order.sn === orderSn);
+          return {
+            ...orderItem,
+            ...order,
+          };
+        })
+        .sort((a, b) => {
+          return b.createTime - a.createTime;
+        }),
+    };
+
+    return createSuccessResponse(res);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -104,17 +114,27 @@ const searchPurchaseByPage = async (event, context) => {
         .count(),
     ]);
 
-    list.forEach((item) => {
-      const { orders, orderList } = item;
-      orderList.forEach((orderItem) => {
-        const { orderSn } = orderItem;
-        let order = orders.find((order) => order.sn === orderSn);
-        orderItem = Object.assign(orderItem, order);
-      });
-      delete item.orders;
+    const res = list.map((item) => {
+      const { orders, orderList, ...rest } = item;
+
+      return {
+        ...rest,
+        orderList: orderList
+          .map((orderItem) => {
+            const { orderSn } = orderItem;
+            let order = orders.find((order) => order.sn === orderSn);
+            return {
+              ...orderItem,
+              ...order,
+            };
+          })
+          .sort((a, b) => {
+            return b.createTime - a.createTime;
+          }),
+      };
     });
 
-    return createPageSuccessResponse(list, total);
+    return createPageSuccessResponse(res, total);
   } catch (error) {
     console.log(error);
     return createErrorResponse(error);

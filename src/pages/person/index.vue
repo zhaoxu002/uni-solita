@@ -1,7 +1,5 @@
 <template>
   <div class="container">
-    <!-- <back-button /> -->
-
     <div class="activity-list">
       <div class="card" v-for="item of list" :key="item._id">
         <div class="name" @click="handleCheckActivity(item.purchaseId)">
@@ -68,6 +66,11 @@
           </div>
         </div>
       </div>
+
+      <uni-load-more
+        :status="loadingStatus"
+        @clickLoadMore="handleGetActivities"
+      />
     </div>
   </div>
 </template>
@@ -91,6 +94,13 @@ export default {
   },
 
   onReachBottom() {
+    this.handleFetch();
+  },
+
+  onPullDownRefresh() {
+    this.current = 1;
+    this.total = 0;
+    this.list = [];
     this.handleFetch();
   },
 
@@ -136,6 +146,9 @@ export default {
         })
         .catch(() => {
           this.loadingStatus = "noMore";
+        })
+        .finally(() => {
+          uni.stopPullDownRefresh();
         });
     },
 

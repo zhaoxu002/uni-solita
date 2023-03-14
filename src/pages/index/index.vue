@@ -1,7 +1,13 @@
 <template>
   <div>
     <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
-    <!-- <button @click="handleAccount">我的订单</button> -->
+    <uni-segmented-control
+      :current="currentCategory"
+      :values="categories"
+      @clickItem="onClickCategory"
+      styleType="text"
+      activeColor="#f2828d"
+    ></uni-segmented-control>
     <view class="container">
       <view
         class="activity"
@@ -30,9 +36,9 @@
               <!-- TODO: -->
               <span> {{ order.createTimeFromNow }}购买了</span>
             </div>
-            <div>
-              <span>{{ order.itemTitle }}</span>
-              <span>&nbsp;+{{ order.itemQuantity }}</span>
+            <div class="line">
+              <div class="ellipsis">{{ order.itemName }}</div>
+              <div>&nbsp;+{{ order.itemQuantity }}</div>
             </div>
           </div>
         </div>
@@ -59,6 +65,8 @@ require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
+const Categories = ["baby", "life"];
+
 export default Vue.extend({
   data() {
     return {
@@ -70,6 +78,10 @@ export default Vue.extend({
       current: 1,
       pageSize: 20,
       total: 0,
+
+      categories: ["母婴", "生活"],
+      currentCategory: 0,
+      category: Categories[0],
     };
   },
   onLoad() {
@@ -80,12 +92,27 @@ export default Vue.extend({
     this.total = 0;
     this.handleGetActivities();
   },
-
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+    return {
+      title: "Baby Show",
+      path: "/pages/index/index",
+    };
+  },
   onReachBottom() {
     this.handleGetActivities();
   },
   methods: {
-    handleGetActivities() {
+    onClickCategory(e) {
+      this.currentCategory = e.currentIndex;
+      this.category = Categories[e.currentIndex];
+      this.current = 1;
+      this.total = 0;
+      this.handleGetActivities(true);
+    },
+    handleGetActivities(reset = false) {
       if (this.loadingStatus === "loading") return;
 
       this.loadingStatus = "loading";
@@ -94,35 +121,34 @@ export default Vue.extend({
           name: "purchase",
           data: {
             method: "getListByPage",
-            query: {},
+            query: {
+              category: this.category,
+            },
             pageQuery: { curPage: this.current, limit: this.pageSize },
           },
         })
         .then((res) => {
-          this.activities = this.activities.concat(
-            res.result.data.data.map((item) => {
-              return {
-                ...item,
-                formatEndTime: dayjs(item.endTime).format(
-                  "YYYY-MM-DD HH:mm:ss"
-                ),
-                startTimeFromNow: dayjs(item.startTime).fromNow(),
-                orderList: item.orderList.slice(0, 5).map((order) => {
-                  return {
-                    ...order,
-                    createTimeFromNow: dayjs(order.createTime).fromNow(),
-                    userName: order.userName
-                      .split("")
-                      .map((s, index, arr) => {
-                        if (index === arr.length - 1) return s;
-                        return "*";
-                      })
-                      .join(""),
-                  };
-                }),
-              };
-            })
-          );
+          const list = res.result.data.data.map((item) => {
+            return {
+              ...item,
+              formatEndTime: dayjs(item.endTime).format("YYYY-MM-DD HH:mm:ss"),
+              startTimeFromNow: dayjs(item.startTime).fromNow(),
+              orderList: item.orderList.slice(0, 5).map((order) => {
+                return {
+                  ...order,
+                  createTimeFromNow: dayjs(order.createTime).fromNow(),
+                  userName: order.userName
+                    .split("")
+                    .map((s, index, arr) => {
+                      if (index === arr.length - 1) return s;
+                      return "*";
+                    })
+                    .join(""),
+                };
+              }),
+            };
+          });
+          this.activities = reset ? list : this.activities.concat(list);
 
           this.total = res.result.data.total;
 
@@ -244,5 +270,14 @@ export default Vue.extend({
   .disable {
     color: $uni-text-color-disable;
   }
+}
+.line {
+  display: flex;
+}
+.ellipsis {
+  width: 30vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -59,9 +59,9 @@
             <!-- TODO: -->
             <span> {{ order.createTimeFromNow }}购买了</span>
           </div>
-          <div>
-            <span>{{ order.itemTitle }}</span>
-            <span>&nbsp;+{{ order.itemQuantity }}</span>
+          <div class="line">
+            <div class="ellipsis">{{ order.itemName }}</div>
+            <div>&nbsp;+{{ order.itemQuantity }}</div>
           </div>
         </div>
       </div>
@@ -382,15 +382,10 @@ export default {
             fileID, // 文件 ID
             success: (res) => {
               const filePath = res.tempFilePath;
-              wx.saveFileToDisk({
+              wx.openDocument({
                 filePath,
-                success(res) {
-                  console.log(res);
-                },
-                fail(res) {
-                  console.error(res);
-                },
-              });
+                showMenu: true
+              })
             },
             fail: console.error,
           });
@@ -630,5 +625,14 @@ $price: #f5222d;
 }
 .font14 {
   font-size: 14px;
+}
+.line {
+  display: flex;
+}
+.ellipsis{
+  width: 30vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
