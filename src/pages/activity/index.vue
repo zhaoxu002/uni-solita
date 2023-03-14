@@ -16,7 +16,9 @@
     <div class="container">
       <div class="info-container">
         <div class="title">{{ title }}</div>
-
+        <div class="status" v-if="isActivityEnd">
+          {{ formatStartTime }} 开始
+        </div>
         <div v-if="endTime" class="status">{{ formatEndTime }} 结束</div>
         <mp-html
           class="rich-text"
@@ -169,6 +171,7 @@ export default {
       now: Date.now(),
       description: "",
       endTime: 0,
+      startTime: 0,
       goods: [],
       records: [],
       headImages: [],
@@ -182,6 +185,9 @@ export default {
   computed: {
     formatEndTime() {
       return dayjs(this.endTime).format("YYYY-MM-DD HH:mm:ss");
+    },
+    formatStartTime() {
+      return dayjs(this.startTime).format("YYYY-MM-DD HH:mm:ss");
     },
     selected() {
       const selectedGoods = this.goods.filter((item) => item.amount > 0);
@@ -200,7 +206,7 @@ export default {
     },
 
     isActivityEnd() {
-      return this.endTime < this.now;
+      return this.endTime < this.now || this.startTime > this.now;
     },
   },
   /**
@@ -264,6 +270,7 @@ export default {
             title,
             items,
             locations,
+            startTime,
             endTime,
             orderList,
             headImages,
@@ -271,6 +278,7 @@ export default {
 
           this.activityId = id;
           this.endTime = endTime;
+          this.startTime = startTime;
           this.description = formatImage(description);
           this.title = title;
           this.goods = [
@@ -347,8 +355,9 @@ export default {
 
     handleConfirm() {
       if (this.isActivityEnd) {
+        const status = this.endTime < this.now ? "已结束" : "未开始";
         uni.showToast({
-          title: "该活动已结束",
+          title: "该活动" + status,
           icon: "error",
           duration: 2000,
         });
@@ -384,8 +393,8 @@ export default {
               const filePath = res.tempFilePath;
               wx.openDocument({
                 filePath,
-                showMenu: true
-              })
+                showMenu: true,
+              });
             },
             fail: console.error,
           });
@@ -629,7 +638,7 @@ $price: #f5222d;
 .line {
   display: flex;
 }
-.ellipsis{
+.ellipsis {
   width: 30vw;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -25,7 +25,7 @@
             <div class="activity-title">
               {{ item.title }}
             </div>
-            <div class="text">{{ item.startTimeFromNow }} 发布</div>
+            <div class="text">{{ item.startTimeFromNow }} 开始</div>
             <div class="text">{{ item.formatEndTime }} 结束</div>
           </div>
         </div>
@@ -33,7 +33,6 @@
           <div v-for="order of item.orderList" :key="order._id" class="order">
             <div>
               <span :style="{ marginRight: '4px' }">{{ order.userName }}</span>
-              <!-- TODO: -->
               <span> {{ order.createTimeFromNow }}购买了</span>
             </div>
             <div class="line">
@@ -44,7 +43,8 @@
         </div>
 
         <div class="status">
-          <span class="active" v-if="item.endTime > now">进行中</span>
+          <span class="disable" v-if="item.startTime > now">未开始</span>
+          <span class="active" v-else-if="item.endTime > now">进行中</span>
           <span class="disable" v-else>已结束</span>
         </div>
       </view>
@@ -90,7 +90,7 @@ export default Vue.extend({
   onPullDownRefresh() {
     this.current = 1;
     this.total = 0;
-    this.handleGetActivities();
+    this.handleGetActivities(true);
   },
   /**
    * 用户点击右上角分享
