@@ -11,7 +11,7 @@ const {
 } = require("./utils/responseUtil");
 
 cloud.init({
-  env: "test-6guvdos0d2e13c77",
+  env: cloud.DYNAMIC_CURRENT_ENV,
 });
 
 // 初始化数据库连接
