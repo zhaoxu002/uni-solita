@@ -88,7 +88,7 @@ const searchPurchaseByPage = async (event, context) => {
           isDelete: _.not(_.eq(true)),
         })
         .sort({
-          createTime: -1,
+          _createTime: -1,
         })
         .skip((curPage - 1) * limit)
         .limit(limit)
