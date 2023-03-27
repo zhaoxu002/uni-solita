@@ -14,9 +14,12 @@
           <input
             type="nickname"
             id="nickname-input"
-            placeholder="请填写您的微信昵称"
           />
+          <div class="desc">
+            请填写您的微信昵称，以便出现问题时卖家在群聊中找到你，沟通订单问题
+        </div>
         </uni-forms-item>
+
 
         <uni-forms-item label="电话" name="userPhone" required>
           <uni-easyinput type="number" v-model="formData.userPhone">
@@ -52,7 +55,7 @@
 
     <div class="bottom-fixed">
       <button :disabled="loading" class="button" @click="handleConfirm">
-        提交接龙
+        提交订单
       </button>
     </div>
   </div>
@@ -212,6 +215,12 @@ $price: #f5222d;
   padding: 16px;
   border-radius: 4px;
   margin-bottom: 16px;
+
+  .desc {
+    margin-top: 4px;
+    font-size: 12px;
+    color: $uni-text-color-grey;
+  }
 }
 .bottom-fixed {
   box-sizing: border-box;
