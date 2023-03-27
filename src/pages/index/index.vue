@@ -1,6 +1,6 @@
 <template>
   <div>
-    <image class="page-bg" src="@/static/indexbg.jpg"></image>
+    <image class="page-bg" src="@/static/indexbg.jpg" mode="aspectFill"></image>
     <uni-segmented-control
       :current="currentCategory"
       :values="categories"

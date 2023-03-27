@@ -113,6 +113,9 @@ export default {
     handleConfirm() {
       if (this.loading) return;
       this.loading = true;
+      uni.showLoading({
+        title: "请稍候",
+      });
       uni
         .createSelectorQuery()
         .in(this) // 注意这里要加上 in(this)
@@ -157,26 +160,31 @@ export default {
                 .then((res) => {
                   console.log("success", res);
 
-                  wx.switchTab({
-                    url: "/pages/person/index",
-                  });
+                  setTimeout(() => {
+                    uni.hideLoading();
+                    wx.switchTab({
+                      url: "/pages/person/index",
+                    });
+                    this.loading = false;
+                  }, 500);
                 })
                 .catch((err) => {
+                  uni.hideLoading();
                   wx.showToast({
                     title: "Whoops 出错了",
                     icon: "error",
                   });
+                  this.loading = false;
                 });
             })
             .catch((e) => {
               console.log("form", e);
+              uni.hideLoading();
               uni.showModal({
                 title: "出错了",
                 content: "请检查表单填写是否完整",
                 showCancel: false,
               });
-            })
-            .finally(() => {
               this.loading = false;
             });
         });
