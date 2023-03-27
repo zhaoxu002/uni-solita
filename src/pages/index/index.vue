@@ -1,13 +1,6 @@
 <template>
   <div>
-    <!-- <image class="page-bg" mode="aspectFill" src="@/static/bg.jpg" alt="" /> -->
-    <div class="page-bg">
-      <div class="t">
-        你们的便利店️❤️
-        <br>
-        母婴生活馆🍼
-      </div>
-    </div>
+    <image class="page-bg" src="@/static/indexbg.jpg"></image>
     <uni-segmented-control
       :current="currentCategory"
       :values="categories"
@@ -195,19 +188,7 @@ export default Vue.extend({
 .page-bg {
   width: 100%;
   height: 30vh;
-  background-image: url(@/static/bg.jpg);
-  background-position: center;
-  background-size: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  .t {
-    font-size: 16px;
-    text-align: center;
-    line-height: 1.8;
-
-  }
 }
 
 .container {
