@@ -72,6 +72,10 @@
         @clickLoadMore="handleGetActivities"
       />
     </div>
+
+    <div class="contact-container">
+      <button class="contact" open-type="contact">联系客服</button>
+    </div>
   </div>
 </template>
 
@@ -165,13 +169,16 @@ export default {
 $price: #f5222d;
 
 .container {
-  padding: 16px;
   /* margin-top: 88px; */
   background: #f7f9fa;
 }
 .header {
 }
 .activity-list {
+  box-sizing: border-box;
+  padding: 16px;
+  padding-bottom: 80px;
+  min-height: 100vh;
 }
 .card {
   background-color: #fff;
@@ -265,5 +272,14 @@ $price: #f5222d;
 }
 .font14 {
   font-size: 14px;
+}
+.contact-container {
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  padding: 16px;
+  background: #fff;
+  z-index: 10000;
+  box-sizing: border-box;
 }
 </style>
