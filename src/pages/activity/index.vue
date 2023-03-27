@@ -7,7 +7,14 @@
     <div class="head-img-container">
       <img :src="headImages[0]" class="head-img" mode="aspectFill" />
 
-      <button class="share" size="mini" open-type="share">转发</button>
+      <button class="share" size="mini" open-type="share" plain>
+        <uni-icons
+          custom-prefix="iconfont"
+          type="icon-share"
+          size="14"
+        ></uni-icons>
+        分享
+      </button>
       <button v-if="isAdmin" class="export" size="mini" @click="handleExport">
         导出订单信息
       </button>
@@ -249,8 +256,9 @@ export default {
    */
   onShareAppMessage() {
     return {
-      title: "Baby Show",
+      title: this.title,
       path: "/pages/activity/index?id=" + this.activityId,
+      imageUrl: '/static/cardbg.jpg'
     };
   },
   methods: {
@@ -408,24 +416,27 @@ $price: #f5222d;
 
 .head-img-container {
   width: 100vw;
-  height: 250px;
+  height: 200px;
   position: relative;
 
   .share {
     position: absolute;
     bottom: 32px;
     right: 16px;
+    height: 24px;
+    border-radius: 12px;
+    line-height: 24px;
   }
 
   .export {
     position: absolute;
     bottom: 32px;
-    right: 80px;
+    right: 100px;
   }
 
   .head-img {
     width: 100vw;
-    height: 250px;
+    height: 200px;
     position: relative;
 
     &:after {
@@ -455,6 +466,11 @@ $price: #f5222d;
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 8px;
+  }
+
+  .status {
+    font-size: 14px;
+    color: $uni-text-color-grey;
   }
 }
 

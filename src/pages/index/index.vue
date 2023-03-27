@@ -1,6 +1,13 @@
 <template>
   <div>
-    <image class="page-bg" mode="aspectFill" src="@/static/pinkbg.jpg" alt="" />
+    <!-- <image class="page-bg" mode="aspectFill" src="@/static/bg.jpg" alt="" /> -->
+    <div class="page-bg">
+      <div class="t">
+        你们的便利店️❤️
+        <br>
+        母婴生活馆🍼
+      </div>
+    </div>
     <uni-segmented-control
       :current="currentCategory"
       :values="categories"
@@ -65,7 +72,7 @@ require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
-const Categories = ["baby", "life"];
+const Categories = ["baby", "life", "sale"];
 
 export default Vue.extend({
   data() {
@@ -79,7 +86,7 @@ export default Vue.extend({
       pageSize: 20,
       total: 0,
 
-      categories: ["母婴", "生活"],
+      categories: ["母婴", "生活", "秒杀"],
       currentCategory: 0,
       category: Categories[0],
     };
@@ -97,8 +104,9 @@ export default Vue.extend({
    */
   onShareAppMessage() {
     return {
-      title: "Baby Show",
+      title: "Becky 好物推荐社",
       path: "/pages/index/index",
+      imageUrl: '/static/cardbg.jpg'
     };
   },
   onReachBottom() {
@@ -187,6 +195,19 @@ export default Vue.extend({
 .page-bg {
   width: 100%;
   height: 30vh;
+  background-image: url(@/static/bg.jpg);
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .t {
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.8;
+
+  }
 }
 
 .container {
