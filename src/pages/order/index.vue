@@ -11,15 +11,11 @@
         </uni-forms-item>
 
         <uni-forms-item label="昵称" name="userName" required>
-          <input
-            type="nickname"
-            id="nickname-input"
-          />
-          <div class="desc">
+          <input type="nickname" id="nickname-input" />
+          <!-- <div class="desc">
             请填写您的昵称，以便出现问题时卖家在群中找到你，沟通订单问题
-        </div>
+          </div> -->
         </uni-forms-item>
-
 
         <uni-forms-item label="电话" name="userPhone" required>
           <uni-easyinput type="number" v-model="formData.userPhone">
@@ -54,7 +50,34 @@
     </div>
 
     <div class="bottom-fixed">
-      <button :disabled="loading" class="button" @click="handleConfirm">
+      <!-- <uni-data-checkbox
+        multiple
+        v-model="agreePolicy"
+        selectedTextColor="black"
+        :localdata="[
+          {
+            value: 1,
+            text: '同意开发者收集您的手机号，用于在商品派送时和用户联系',
+          },
+        ]"
+      >
+      </uni-data-checkbox> -->
+      <checkbox-group @change="handleCheckboxChange">
+        <label class="checkbox-label">
+          <checkbox
+            :value="true"
+            :checked="false"
+            :style="{ transform: 'scale(0.7)' }"
+          ></checkbox>
+          同意开发者收集您的手机号，用于在商品派送时和用户联系
+        </label>
+      </checkbox-group>
+
+      <button
+        :disabled="loading || !agreePolicy"
+        class="button"
+        @click="handleConfirm"
+      >
         提交订单
       </button>
     </div>
@@ -82,6 +105,7 @@ export default {
       ],
       rules: [],
       loading: false,
+      agreePolicy: false,
     };
   },
 
@@ -193,6 +217,11 @@ export default {
         });
     },
 
+    handleCheckboxChange(e) {
+      console.log(e);
+      this.agreePolicy = Boolean(e.detail.value[0])
+    },
+
     handleInput(e) {
       this.input = e.detail.value;
       this.$refs.input.setValue(e.detail.value);
@@ -222,6 +251,10 @@ $price: #f5222d;
     color: $uni-text-color-grey;
   }
 }
+.checkbox-label {
+  font-size: 12px;
+  color: #666;
+}
 .bottom-fixed {
   box-sizing: border-box;
   position: fixed;
@@ -232,7 +265,6 @@ $price: #f5222d;
   padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
   padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
   background: #fff;
-  display: flex;
 
   .button {
     flex-grow: 1;
