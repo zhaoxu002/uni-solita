@@ -3,5 +3,18 @@
   "setting": {
     "preloadBackgroundData": false
   },
-  "libVersion": "2.30.2"
+  "libVersion": "2.30.2",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "",
+          "pathName": "pages/order/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        }
+      ]
+    }
+  }
 }

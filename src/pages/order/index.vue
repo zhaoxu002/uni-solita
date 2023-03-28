@@ -12,14 +12,22 @@
 
         <uni-forms-item label="昵称" name="userName" required>
           <input type="nickname" id="nickname-input" />
-          <!-- <div class="desc">
+          <div class="desc">
             请填写您的昵称，以便出现问题时卖家在群中找到你，沟通订单问题
-          </div> -->
+          </div>
         </uni-forms-item>
 
-        <uni-forms-item label="电话" name="userPhone" required>
+        <uni-forms-item
+          label="电话"
+          name="userPhone"
+          required
+          v-if="cart.goods.length > 0"
+        >
           <uni-easyinput type="number" v-model="formData.userPhone">
           </uni-easyinput>
+          <div class="desc">
+            请填写您的电话，以便出现问题时卖家联系你，沟通订单问题
+          </div>
         </uni-forms-item>
 
         <uni-forms-item label="备注" name="note">
@@ -50,19 +58,7 @@
     </div>
 
     <div class="bottom-fixed">
-      <!-- <uni-data-checkbox
-        multiple
-        v-model="agreePolicy"
-        selectedTextColor="black"
-        :localdata="[
-          {
-            value: 1,
-            text: '同意开发者收集您的手机号，用于在商品派送时和用户联系',
-          },
-        ]"
-      >
-      </uni-data-checkbox> -->
-      <checkbox-group @change="handleCheckboxChange">
+      <!-- <checkbox-group @change="handleCheckboxChange">
         <label class="checkbox-label">
           <checkbox
             :value="true"
@@ -71,7 +67,7 @@
           ></checkbox>
           同意开发者收集您的手机号，用于在商品派送时和用户联系
         </label>
-      </checkbox-group>
+      </checkbox-group> -->
 
       <button
         :disabled="loading || !agreePolicy"
@@ -105,7 +101,7 @@ export default {
       ],
       rules: [],
       loading: false,
-      agreePolicy: false,
+      agreePolicy: true,
     };
   },
 
@@ -138,6 +134,7 @@ export default {
 
   methods: {
     handleConfirm() {
+      if (!this.cart.goods || this.cart.goods.length === 0) return;
       if (this.loading) return;
       this.loading = true;
       uni.showLoading({
@@ -187,6 +184,15 @@ export default {
                 .then((res) => {
                   console.log("success", res);
 
+                  if (!res.result.success) {
+                    uni.showToast({
+                      title: "库存不足",
+                      icon: "error",
+                    });
+
+                    return;
+                  }
+
                   setTimeout(() => {
                     uni.hideLoading();
                     wx.switchTab({
@@ -219,7 +225,7 @@ export default {
 
     handleCheckboxChange(e) {
       console.log(e);
-      this.agreePolicy = Boolean(e.detail.value[0])
+      this.agreePolicy = Boolean(e.detail.value[0]);
     },
 
     handleInput(e) {
