@@ -10,7 +10,12 @@
           ></uni-data-picker>
         </uni-forms-item>
 
-        <uni-forms-item label="昵称" name="userName" required>
+        <uni-forms-item
+          label="昵称"
+          name="userName"
+          required
+          v-if="cart.goods.length > 0"
+        >
           <input type="nickname" id="nickname-input" />
           <div class="desc">
             请填写您的昵称，以便出现问题时卖家在群中找到你，沟通订单问题
