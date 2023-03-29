@@ -54,10 +54,13 @@
             <div class="name">{{ item.name }}</div>
             <div class="price">$ {{ item.price }}</div>
             <div class="origin-price">{{ item.originPrice }}</div>
+            <div class="stock">库存：{{ item.stock }}</div>
+
             <uni-number-box
               v-model="item.amount"
               :min="0"
               :step="1"
+              :max="item.stock"
               background="#f2828d"
             />
           </div>
@@ -110,12 +113,16 @@
             <div>
               <div class="name">{{ goodDetail.name }}</div>
               <div class="price">$ {{ goodDetail.price }}</div>
+              <div class="origin-price">{{ item.originPrice }}</div>
+
+              <div class="stock">库存：{{ goodDetail.stock }}</div>
             </div>
           </div>
           <uni-number-box
             v-model="goodDetail.amount"
             :step="1"
             :min="0"
+            :max="goodDetail.stock"
             background="#f2828d"
           />
         </div>
@@ -463,7 +470,7 @@ $price: #f5222d;
   .copy {
     position: absolute;
     bottom: 32px;
-    right: 200px;
+    right: 216px;
   }
 
   .head-img {
@@ -669,6 +676,11 @@ $price: #f5222d;
 }
 .price {
   color: $price;
+}
+.stock {
+  font-size: 12px;
+  color: #666;
+  margin: 4px 0;
 }
 .good-info {
   padding: 8px;
