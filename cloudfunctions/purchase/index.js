@@ -4,19 +4,22 @@ const {
   removePurchaseById,
   createPurchase,
   modifyPurchase,
-} = require('./controller');
+  copyPurchaseById,
+} = require("./controller");
 
 exports.main = async (event, context) => {
   switch (event.method) {
-    case 'getOne':
+    case "getOne":
       return await searchPurchaseById(event, context);
-    case 'getListByPage':
+    case "getListByPage":
       return await searchPurchaseByPage(event, context);
-    case 'removeOne':
+    case "removeOne":
       return await removePurchaseById(event, context);
-    case 'createOne':
+    case "createOne":
       return await createPurchase(event, context);
-    case 'updateOne':
+    case "updateOne":
       return await modifyPurchase(event, context);
+    case "copyOne":
+      return await copyPurchaseById(event, context);
   }
 };

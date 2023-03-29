@@ -151,6 +151,37 @@ const removePurchaseById = async (event, context) => {
   }
 };
 
+const copyPurchaseById = async (event) => {
+  const { id } = event;
+  try {
+    const activity = await daoUtils.getOne(collection, id)
+    console.log('activity', activity)
+    const {
+      _id,
+      orderList,
+      _createTime,
+      _updateTime,
+      isDelete,
+      title,
+      ...rest
+    } = activity
+
+    const newActivity = {
+      ...rest,
+      title: title + '(副本)',
+      _createTime: Date.now(),
+      _updateTime: Date.now(),
+      orderList: [],
+      isDelete: true
+    }
+    await daoUtils.createOne(collection, newActivity)
+    return createSuccessResponse()
+
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+}
+
 const createPurchase = async (event, context) => {
   const { data } = event;
   const vo = new Purchase(data);
@@ -176,6 +207,7 @@ module.exports = {
   searchPurchaseById,
   searchPurchaseByPage,
   removePurchaseById,
+  copyPurchaseById,
   createPurchase,
   modifyPurchase,
 };

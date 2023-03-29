@@ -18,6 +18,9 @@
       <button v-if="isAdmin" class="export" size="mini" @click="handleExport">
         导出订单信息
       </button>
+      <button v-if="isAdmin" class="copy" size="mini" @click="handleCopy">
+        复制接龙
+      </button>
     </div>
 
     <div class="container">
@@ -65,7 +68,6 @@
         <div v-for="order of records" :key="order._id" class="order">
           <div>
             <span :style="{ marginRight: '4px' }">{{ order.userName }}</span>
-            <!-- TODO: -->
             <span> {{ order.createTimeFromNow }}购买了</span>
           </div>
           <div class="line">
@@ -258,7 +260,7 @@ export default {
     return {
       title: this.title,
       path: "/pages/activity/index?id=" + this.activityId,
-      imageUrl: '/static/cardbg.jpg'
+      imageUrl: "/static/cardbg.jpg",
     };
   },
   methods: {
@@ -408,6 +410,31 @@ export default {
           });
         });
     },
+
+    handleCopy() {
+      wx.cloud
+        .callFunction({
+          name: "purchase",
+          data: {
+            method: "copyOne",
+            id: this.activityId,
+          },
+        })
+        .then((res) => {
+          if (res.result.success === true) {
+            wx.showModal({
+              title: "复制成功",
+              content: "请前往后台继续编辑",
+              showCancel: false,
+            });
+          } else {
+            wx.showToast({
+              title: "复制失败",
+              icon: "error",
+            });
+          }
+        });
+    },
   },
 };
 </script>
@@ -432,6 +459,11 @@ $price: #f5222d;
     position: absolute;
     bottom: 32px;
     right: 100px;
+  }
+  .copy {
+    position: absolute;
+    bottom: 32px;
+    right: 200px;
   }
 
   .head-img {
