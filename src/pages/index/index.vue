@@ -1,6 +1,11 @@
 <template>
   <div>
-    <image class="page-bg" src="@/static/indexbg.jpg" mode="aspectFill"></image>
+    <image
+      class="page-bg"
+      src="@/static/head.jpg"
+      mode="aspectFill"
+      show-menu-by-longpress
+    ></image>
     <uni-segmented-control
       :current="currentCategory"
       :values="categories"
@@ -20,6 +25,7 @@
             class="activity-image"
             :src="item.headImages[0]"
             mode="aspectFill"
+            lazy-load
           />
           <div>
             <div class="activity-title">
@@ -99,7 +105,7 @@ export default Vue.extend({
     return {
       title: "Becky 好物推荐社",
       path: "/pages/index/index",
-      imageUrl: '/static/cardbg.jpg'
+      imageUrl: "/static/cardbg.jpg",
     };
   },
   onReachBottom() {
@@ -187,8 +193,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-bg {
   width: 100%;
-  height: 30vh;
-
+  height: 42vw;
 }
 
 .container {

@@ -1,5 +1,36 @@
 <template>
   <div class="container">
+    <div class="info">
+      <div class="row">
+        <div class="label">银行转账 ANZ:</div>
+        <div class="content">
+          06-0193-0903969-00
+
+          <div class="button" @click="handleCopyAccount">
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-copy"
+              size="14"
+            ></uni-icons>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">公司名称:</div>
+        <div class="content">
+          Salessmart Ltd
+
+          <div class="button" @click="handleCopyName">
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-copy"
+              size="14"
+            ></uni-icons>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="activity-list">
       <div class="card" v-for="item of list" :key="item._id">
         <div class="name" @click="handleCheckActivity(item.purchaseId)">
@@ -161,6 +192,18 @@ export default {
         url: "/pages/activity/index?id=" + id,
       });
     },
+
+    handleCopyAccount() {
+      uni.setClipboardData({
+        data: "06-0193-0903969-00",
+      });
+    },
+
+    handleCopyName() {
+      uni.setClipboardData({
+        data: "Salessmart Ltd",
+      });
+    },
   },
 };
 </script>
@@ -172,7 +215,27 @@ $price: #f5222d;
   /* margin-top: 88px; */
   background: #f7f9fa;
 }
-.header {
+.info {
+  background: #fff;
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.8;
+
+  .row {
+    display: flex;
+  }
+  .label {
+    margin-right: 8px;
+  }
+
+  .button {
+    margin-left: 8px;
+  }
+
+  .content {
+    display: flex;
+  }
 }
 .activity-list {
   box-sizing: border-box;

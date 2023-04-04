@@ -28,14 +28,18 @@
           required
           v-if="cart.goods.length > 0"
         >
-          <uni-easyinput type="number" v-model="formData.userPhone">
+          <uni-easyinput
+            type="number"
+            v-model="formData.userPhone"
+            :maxlength="11"
+          >
           </uni-easyinput>
           <div class="desc">
             请填写您的电话，以便出现问题时卖家联系你，沟通订单问题
           </div>
         </uni-forms-item>
 
-        <uni-forms-item label="备注" name="note">
+        <uni-forms-item label="备注" name="note" v-if="cart.goods.length > 0">
           <uni-easyinput v-model="formData.note"></uni-easyinput>
         </uni-forms-item>
       </uni-forms>
@@ -78,6 +82,7 @@
         :disabled="loading || !agreePolicy"
         class="button"
         @click="handleConfirm"
+        v-if="cart.goods.length > 0"
       >
         提交订单
       </button>
