@@ -83,7 +83,7 @@ const searchOrderByUserOpenIdAndPage = async (event, context) => {
         .count(),
     ]);
     list.forEach((order) => {
-      order.purchaseTitle = order.purchase[0].title;
+      order.purchaseTitle = order.purchase?.[0].title || '已删除的接龙';
       delete order.purchase;
     });
     return createPageSuccessResponse(list, total);
@@ -331,6 +331,9 @@ const exportOrdersByPurchaseId = async (event, context) => {
       totalAmount,
       detailAddress,
     } = order;
+    if (!purchase[0]) {
+      return
+    }
     const curPurchaseTitle = purchase[0].title;
     if (!purchaseTitle) {
       purchaseTitle = curPurchaseTitle;
