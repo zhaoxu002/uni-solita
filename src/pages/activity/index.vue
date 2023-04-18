@@ -5,7 +5,7 @@
   <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <view>
     <div class="head-img-container">
-      <img :src="headImages[0]" class="head-img" mode="aspectFill" />
+      <img :src="headImages[0]" class="head-img" mode="aspectFill" lazy-load />
 
       <button class="share" size="mini" open-type="share" plain>
         <uni-icons
@@ -44,6 +44,7 @@
         <div class="good" v-for="item of goods" :key="item._id">
           <img
             class="good-img"
+            lazy-load
             mode="aspectFill"
             :src="item.defaultImg"
             alt=""
@@ -109,6 +110,8 @@
               :src="goodDetail.defaultImg"
               class="good-image"
               mode="aspectFill"
+              lazy-load
+              @click="handlePreviewImage(goodDetail.defaultImg)"
             />
             <div>
               <div class="name">{{ goodDetail.name }}</div>
@@ -129,7 +132,12 @@
         <scroll-view scroll-y class="good-detail">
           <div class="padding-16 margin-bottom-60">
             <div v-for="(img, index) of goodDetail.images" :key="index">
-              <image class="img-list-item" mode="aspectFit" :src="img" />
+              <image
+                class="img-list-item"
+                mode="aspectFit"
+                :src="img"
+                lazy-load
+              />
             </div>
 
             <mp-html
@@ -151,7 +159,12 @@
             v-for="item of selected.selectedGoods"
             :key="item._id"
           >
-            <img :src="item.defaultImg" class="image" mode="aspectFill" />
+            <img
+              :src="item.defaultImg"
+              class="image"
+              mode="aspectFill"
+              lazy-load
+            />
 
             <div class="info">
               <div class="name">
@@ -267,7 +280,8 @@ export default {
     return {
       title: this.title,
       path: "/pages/activity/index?id=" + this.activityId,
-      imageUrl: "/static/cardbg.jpg",
+      // imageUrl: "/static/cardbg.jpg",
+      imageUrl: this.headImages[0]
     };
   },
   methods: {
@@ -441,6 +455,13 @@ export default {
             });
           }
         });
+    },
+
+    handlePreviewImage(url) {
+      console.log("sb", url);
+      uni.previewImage({
+        urls: [url],
+      });
     },
   },
 };

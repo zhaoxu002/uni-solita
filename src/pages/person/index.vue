@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="info">
+    <div class="header-info">
       <div class="row">
         <div class="label">银行转账 ANZ:</div>
         <div class="content">
@@ -38,9 +38,23 @@
         </div>
 
         <div class="body">
-          <div class="flex">
+          <div class="flex-line">
             <div>
               <div class="secondary">下单时间：{{ item.createTime }}</div>
+            </div>
+          </div>
+          <div class="flex-line">
+            <div>
+              <div class="secondary">订单ID： {{ item.sn }}</div>
+            </div>
+            <div>
+              <div class="button" @click="handleCopySn(item.sn)">
+                <uni-icons
+                  custom-prefix="iconfont"
+                  type="icon-copy"
+                  size="12"
+                ></uni-icons>
+              </div>
             </div>
           </div>
 
@@ -53,6 +67,7 @@
               class="item-img"
               :src="good.itemDefaultImg"
               mode="aspectFill"
+              lazy-load
             ></image>
 
             <div class="item-desc">
@@ -204,6 +219,12 @@ export default {
         data: "Salessmart Ltd",
       });
     },
+
+    handleCopySn(sn) {
+      uni.setClipboardData({
+        data: sn,
+      });
+    },
   },
 };
 </script>
@@ -215,7 +236,7 @@ $price: #f5222d;
   /* margin-top: 88px; */
   background: #f7f9fa;
 }
-.info {
+.header-info {
   background: #fff;
   padding: 16px;
   font-size: 14px;
@@ -263,7 +284,7 @@ $price: #f5222d;
   .item-info {
     display: flex;
     height: 40px;
-    margin-bottom: 8px;
+    margin: 8px 0;
 
     .item-img {
       width: 40px;
@@ -294,6 +315,11 @@ $price: #f5222d;
   display: flex;
   justify-content: space-between;
 }
+.flex-line {
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .body {
   .bold {
     font-weight: bold;
@@ -302,7 +328,6 @@ $price: #f5222d;
   .secondary {
     font-size: 12px;
     color: $uni-text-color-grey;
-    margin-bottom: 8px;
   }
 
   .right {

@@ -47,7 +47,7 @@
 
     <div class="card">
       <div v-for="item of cart.goods" :key="item._id" class="item">
-        <img :src="item.defaultImg" class="image" mode="aspectFill" />
+        <img :src="item.defaultImg" class="image" mode="aspectFill" lazy-load />
 
         <div class="info">
           <div class="name">
@@ -65,6 +65,8 @@
 
       <div>总价：$ {{ totalPrice }}</div>
     </div>
+
+    <div class="padding-bottom-80"></div>
 
     <div class="bottom-fixed">
       <!-- <checkbox-group @change="handleCheckboxChange">
@@ -316,6 +318,9 @@ $price: #f5222d;
   font-size: 14px;
   height: 35px;
   padding-left: 10px;
+}
+.padding-bottom-80 {
+  padding-bottom: 80px;
 }
 .info {
   font-size: 12px;

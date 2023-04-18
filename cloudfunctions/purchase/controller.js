@@ -50,8 +50,7 @@ const searchPurchaseById = async (event, context) => {
       })
       .end();
     const [item] = list;
-    const { orders, orderList, ...rest } = item;
-
+    const { orders, orderList, locations, ...rest } = item;
     const res = {
       ...rest,
       orderList: orderList
@@ -66,6 +65,9 @@ const searchPurchaseById = async (event, context) => {
         .sort((a, b) => {
           return b.createTime - a.createTime;
         }),
+      locations: locations.sort((a, b) => {
+        return a.description.localeCompare(b.description, 'zh')
+      })
     };
 
     return createSuccessResponse(res);

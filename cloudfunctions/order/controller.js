@@ -3,6 +3,7 @@ const { nanoid } = require("nanoid");
 const xlsx = require("node-xlsx");
 const getItemDescription = require("./utils/getItemDescription");
 const daoUtils = require("./utils/daoUtil");
+const { getTime } = require("./utils/getTime");
 const { Order, OrderItem } = require("./orderVo");
 const {
   createSuccessResponse,
@@ -83,7 +84,8 @@ const searchOrderByUserOpenIdAndPage = async (event, context) => {
         .count(),
     ]);
     list.forEach((order) => {
-      order.purchaseTitle = order.purchase?.[0].title || '已删除的接龙';
+      order.purchaseTitle =
+        (order.purchase[0] && order.purchase[0].title) || "已删除的接龙";
       delete order.purchase;
     });
     return createPageSuccessResponse(list, total);
@@ -181,7 +183,7 @@ const createOrder = async (event, context) => {
       itemIds.push(itemId);
       itemIdMapQuantity.set(itemId, itemQuantity);
     });
-    const sn = nanoid();
+    const sn = nanoid(4) + getTime();
     const orderVo = new Order(sn, data);
     const items = await daoUtils.getList(itemCollection, {
       _id: _.in(itemIds),
@@ -208,7 +210,7 @@ const createOrder = async (event, context) => {
         purchase._id
       );
     });
-    await db.runTransaction(async (transaction) => {
+    const res = await db.runTransaction(async (transaction) => {
       const orderCollection = transaction.collection("order");
       const orderItemCollection = transaction.collection("orderItem");
       const itemCollection = transaction.collection("item");
@@ -243,7 +245,7 @@ const createOrder = async (event, context) => {
         throw error;
       }
     }, 3);
-    return createSuccessResponse();
+    return createSuccessResponse(res);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -288,11 +290,11 @@ const cancelOrderBySn = async (event, context) => {
 };
 
 const exportOrdersByPurchaseId = async (event, context) => {
-  const { _id } = event;
+  const { purchaseId } = event;
   const { list } = await orderCollection
     .aggregate()
     .match({
-      purchaseId: _id,
+      purchaseId: purchaseId,
       isDelete: _.not(_.eq(true)),
     })
     .sort({
@@ -332,7 +334,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
       detailAddress,
     } = order;
     if (!purchase[0]) {
-      return
+      break;
     }
     const curPurchaseTitle = purchase[0].title;
     if (!purchaseTitle) {
