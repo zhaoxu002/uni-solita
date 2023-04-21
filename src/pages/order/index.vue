@@ -166,6 +166,11 @@ export default {
             .validate()
             .then((res) => {
               console.log("res", res);
+
+              if (!nickName.trim()) {
+                return Promise.reject();
+              }
+
               const data = {
                 purchaseId: this.id,
                 userPhone: res.userPhone,
@@ -185,6 +190,8 @@ export default {
 
               console.log("data", data);
 
+              console.log('SUBMIT')
+
               wx.cloud
                 .callFunction({
                   name: "order",
@@ -194,9 +201,8 @@ export default {
                   },
                 })
                 .then((res) => {
-                  console.log("success", res);
-
                   if (!res.result.success) {
+                    console.log(res.result.errMsg.errMsg);
                     uni.showToast({
                       title: "库存不足",
                       icon: "error",

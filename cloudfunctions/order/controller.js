@@ -13,6 +13,7 @@ const {
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
+  // env: "production-2gohghtr3e52cd68",
 });
 
 // 初始化数据库连接
@@ -221,25 +222,35 @@ const createOrder = async (event, context) => {
         throw error;
       }
       try {
-        await Promise.all(
-          orderItemVos.map(async (orderItemVo) => {
-            await daoUtils.createOne(orderItemCollection, orderItemVo);
-          })
-        );
+        // await Promise.all(
+        //   orderItemVos.map(async (orderItemVo) => {
+        //     await daoUtils.createOne(orderItemCollection, orderItemVo);
+        //   })
+        // );
+        for (const orderItemVo of orderItemVos) {
+          await daoUtils.createOne(orderItemCollection, orderItemVo);
+        }
       } catch (error) {
         await transaction.rollback();
         throw error;
       }
       try {
-        await Promise.all(
-          itemIds.map(async (itemId) => {
-            const itemQuantity = itemIdMapQuantity.get(itemId);
-            await daoUtils.updateOne(itemCollection, itemId, {
-              stock: _.inc(-itemQuantity),
-              saleCount: _.inc(itemQuantity),
-            });
-          })
-        );
+        // await Promise.all(
+        //   itemIds.map(async (itemId) => {
+        //     const itemQuantity = itemIdMapQuantity.get(itemId);
+        //     await daoUtils.updateOne(itemCollection, itemId, {
+        //       stock: _.inc(-itemQuantity),
+        //       saleCount: _.inc(itemQuantity),
+        //     });
+        //   })
+        // );
+        for (const itemId of itemIds) {
+          const itemQuantity = itemIdMapQuantity.get(itemId);
+          await daoUtils.updateOne(itemCollection, itemId, {
+            stock: _.inc(-itemQuantity),
+            saleCount: _.inc(itemQuantity),
+          });
+        }
       } catch (error) {
         await transaction.rollback();
         throw error;
@@ -313,6 +324,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
       foreignField: "_id",
       as: "purchase",
     })
+    .limit(10000)
     .end();
   const title = [
     "接龙名称",
@@ -320,7 +332,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
     "买家手机",
     "商品*数量",
     "总价",
-    "自提点",
+    "备注",
   ];
   let addressMapXlsxBody = new Map();
   let purchaseTitle = "";
@@ -332,7 +344,9 @@ const exportOrdersByPurchaseId = async (event, context) => {
       orderItems,
       totalAmount,
       detailAddress,
+      note,
     } = order;
+    const validDetailAddress = detailAddress.replace("/", "-");
     if (!purchase[0]) {
       break;
     }
@@ -346,12 +360,12 @@ const exportOrdersByPurchaseId = async (event, context) => {
       userPhone,
       getItemDescription(orderItems),
       totalAmount,
-      detailAddress,
+      note,
     ];
-    if (addressMapXlsxBody.has(detailAddress)) {
-      addressMapXlsxBody.get(detailAddress).push(curOrderDesc);
+    if (addressMapXlsxBody.has(validDetailAddress)) {
+      addressMapXlsxBody.get(validDetailAddress).push(curOrderDesc);
     } else {
-      addressMapXlsxBody.set(detailAddress, [curOrderDesc]);
+      addressMapXlsxBody.set(validDetailAddress, [curOrderDesc]);
     }
   }
 
