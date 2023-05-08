@@ -9,8 +9,8 @@
       "list": [
         {
           "name": "",
-          "pathName": "pages/order/index",
-          "query": "",
+          "pathName": "pages/activity/index",
+          "query": "nanoid=FObyvc_iwR",
           "launchMode": "default",
           "scene": null
         }

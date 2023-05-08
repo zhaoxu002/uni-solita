@@ -5,6 +5,7 @@
   <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <view>
     <div class="head-img-container">
+      <!-- <img :src="qrcode" /> -->
       <img :src="headImages[0]" class="head-img" mode="aspectFill" lazy-load />
 
       <button class="share" size="mini" open-type="share" plain>
@@ -20,6 +21,14 @@
       </button>
       <button v-if="isAdmin" class="copy" size="mini" @click="handleCopy">
         复制接龙
+      </button>
+      <button
+        v-if="isAdmin"
+        class="share-qr"
+        size="mini"
+        @click="handleShareQr"
+      >
+        分享图片
       </button>
     </div>
 
@@ -182,6 +191,15 @@
         </div>
       </uni-popup>
     </div>
+
+    <c-canvas
+      ref="cCanvas"
+      :isAuto="false"
+      @drawSuccess="onDrawSuccess"
+      :drawData="canvasData"
+      :width="960"
+      :height="1440"
+    />
   </view>
 </template>
 
@@ -190,12 +208,14 @@ import store from "@/store/index";
 import formatImage from "@/utils/formatHTMLImage";
 import dayjs from "dayjs";
 import mpHtml from "@/uni_modules/mp-html/components/mp-html/mp-html.vue";
+import cCanvas from "@/uni_modules/c-canvas/components/c-canvas/c-canvas.vue";
 
 export default {
-  components: { mpHtml },
+  components: { mpHtml, cCanvas },
   data() {
     return {
       activityId: "",
+      nanoId: "",
       title: "",
       now: Date.now(),
       description: "",
@@ -208,6 +228,9 @@ export default {
 
       pageContainerShow: false,
       goodDetail: null,
+
+      qrcode: "",
+      canvasData: [],
     };
   },
 
@@ -242,9 +265,12 @@ export default {
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    const { id } = options;
-
-    this.fetch(id);
+    const { id, nanoid } = options;
+    if (nanoid) {
+      this.fetchByNanoId(nanoid);
+    } else {
+      this.fetch(id);
+    }
     this.checkIsAdmin();
   },
   /**
@@ -281,7 +307,7 @@ export default {
       title: this.title,
       path: "/pages/activity/index?id=" + this.activityId,
       // imageUrl: "/static/cardbg.jpg",
-      imageUrl: this.headImages[0]
+      imageUrl: this.headImages[0],
     };
   },
   methods: {
@@ -295,49 +321,69 @@ export default {
           },
         })
         .then((res) => {
-          console.log(res.result.data);
-          const {
-            description,
-            title,
-            items,
-            locations,
-            startTime,
-            endTime,
-            orderList,
-            headImages,
-          } = res.result.data;
-
-          this.activityId = id;
-          this.endTime = endTime;
-          this.startTime = startTime;
-          this.description = formatImage(description);
-          this.title = title;
-          this.goods = [
-            ...items.filter((i) => i.recommend === true),
-            ...items.filter((i) => !i.recommend),
-          ].map((item) => {
-            return {
-              ...item,
-              amount: 0,
-            };
-          });
-          this.records = orderList.map((order) => {
-            return {
-              ...order,
-              createTimeFromNow: dayjs(order.createTime).fromNow(),
-              userName: order.userName
-                .split("")
-                .map((s, index, arr) => {
-                  if (index === arr.length - 1) return s;
-                  return "*";
-                })
-                .join(""),
-            };
-          });
-          this.headImages = headImages;
-          store.commit("updateLocationList", locations);
+          this.process(res);
         });
     },
+    fetchByNanoId(nanoId) {
+      wx.cloud
+        .callFunction({
+          name: "purchase",
+          data: {
+            method: "getOneByNanoId",
+            nanoId: nanoId,
+          },
+        })
+        .then((res) => {
+          this.process(res);
+        });
+    },
+    process(res) {
+      console.log(res.result.data);
+      const {
+        description,
+        title,
+        items,
+        locations,
+        startTime,
+        endTime,
+        orderList,
+        headImages,
+        nanoId,
+        _id,
+      } = res.result.data;
+
+      this.activityId = _id;
+      this.nanoId = nanoId;
+      this.endTime = endTime;
+      this.startTime = startTime;
+      this.description = formatImage(description);
+      this.title = title;
+      this.goods = [
+        ...items.filter((i) => i.recommend === true),
+        ...items.filter((i) => !i.recommend),
+      ].map((item) => {
+        return {
+          ...item,
+          amount: 0,
+        };
+      });
+      this.records = orderList.map((order) => {
+        return {
+          ...order,
+          createTimeFromNow: dayjs(order.createTime).fromNow(),
+          userName: order.userName
+            .split("")
+            .map((s, index, arr) => {
+              if (index === arr.length - 1) return s;
+              return "*";
+            })
+            .join(""),
+        };
+      });
+      this.headImages = headImages;
+      store.commit("updateLocationList", locations);
+    },
+
     checkIsAdmin() {
       wx.cloud
         .callFunction({
@@ -463,6 +509,74 @@ export default {
         urls: [url],
       });
     },
+
+    handleShareQr() {
+      wx.cloud
+        .callFunction({
+          name: "qrCode",
+          data: {
+            page: "pages/activity/index",
+            scene: "nanoid=" + this.nanoId,
+          },
+        })
+        .then(async (res) => {
+          console.log(res);
+
+          this.qrcode = "data:image/jpeg;charset=utf-8;base64," + res.result;
+          const {
+            fileList: [headImage],
+          } = await uni.cloud.getTempFileURL({
+            fileList: [this.headImages[0]],
+          });
+          console.log(headImage);
+          this.canvasData = [
+            {
+              type: "image",
+              x: 0,
+              y: 0,
+              value: headImage.tempFileURL,
+              width: 960,
+              height: 960,
+            },
+            {
+              type: "text",
+              x: 32,
+              y: 1032,
+              value: this.title,
+              color: "#262626",
+              lineMaxWidth: 850,
+              lineHeight: 60,
+              lineNum: 2,
+              font: "normal normal bold 48px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
+            },
+            {
+              type: "text",
+              x: 32,
+              y: 1276,
+              color: "#999",
+              value: "长按扫码，参与接龙",
+              lineMaxWidth: 700,
+              lineHeight: 60,
+              lineNum: 2,
+              font: "normal normal bold 36px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
+            },
+            {
+              type: "image",
+              x: 628,
+              y: 1108,
+              width: 300,
+              height: 300,
+              value: this.qrcode,
+            },
+          ];
+
+          this.$refs.cCanvas.draw();
+        });
+    },
+
+    onDrawSuccess(res) {
+      this.handlePreviewImage(res);
+    },
   },
 };
 </script>
@@ -491,6 +605,12 @@ $price: #f5222d;
   .copy {
     position: absolute;
     bottom: 32px;
+    right: 216px;
+  }
+
+  .share-qr {
+    position: absolute;
+    bottom: 64px;
     right: 216px;
   }
 

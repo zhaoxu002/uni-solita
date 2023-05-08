@@ -6,6 +6,7 @@ const {
   createErrorResponse,
   createPageSuccessResponse,
 } = require("./utils/responseUtil");
+const { nanoid } = require("nanoid");
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -66,11 +67,33 @@ const searchPurchaseById = async (event, context) => {
           return b.createTime - a.createTime;
         }),
       locations: locations.sort((a, b) => {
-        return a.description.localeCompare(b.description, 'zh')
-      })
+        return a.description.localeCompare(b.description, "zh");
+      }),
     };
 
     return createSuccessResponse(res);
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
+const searchPurchaseByNanoId = async (event, context) => {
+  try {
+    const { nanoId } = event;
+    const { data } = await collection
+      .where({
+        nanoId,
+      })
+      .get();
+
+    if (data.length === 0) {
+      return createErrorResponse('cannot found')
+    }
+
+    const [record] = data;
+    const { _id } = record;
+
+    return await searchPurchaseById({ _id }, context);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -156,8 +179,8 @@ const removePurchaseById = async (event, context) => {
 const copyPurchaseById = async (event) => {
   const { id } = event;
   try {
-    const activity = await daoUtils.getOne(collection, id)
-    console.log('activity', activity)
+    const activity = await daoUtils.getOne(collection, id);
+    console.log("activity", activity);
     const {
       _id,
       orderList,
@@ -166,23 +189,22 @@ const copyPurchaseById = async (event) => {
       isDelete,
       title,
       ...rest
-    } = activity
+    } = activity;
 
     const newActivity = {
       ...rest,
-      title: title + '(副本)',
+      title: title + "(副本)",
       _createTime: Date.now(),
       _updateTime: Date.now(),
       orderList: [],
-      isDelete: true
-    }
-    await daoUtils.createOne(collection, newActivity)
-    return createSuccessResponse()
-
+      isDelete: true,
+    };
+    await daoUtils.createOne(collection, newActivity);
+    return createSuccessResponse();
   } catch (error) {
     return createErrorResponse(error);
   }
-}
+};
 
 const createPurchase = async (event, context) => {
   const { data } = event;
@@ -205,11 +227,36 @@ const modifyPurchase = async (event, context) => {
   }
 };
 
+const batchAddNanoId = async () => {
+  try {
+    const result = await db.runTransaction(async (transacation) => {
+      try {
+        const collection = transacation.collection('purchase')
+        const list = await daoUtils.getList(collection, {})
+        for (const item of list) {
+          await daoUtils.updateOne(collection, item._id, {
+            nanoId: nanoid(10)
+          })
+        }
+      } catch (error) {
+        transacation.rollback()
+        throw error
+      }
+    })
+
+    return createSuccessResponse(result)
+  } catch (error) {
+    return createErrorResponse(error)
+  }
+}
+
 module.exports = {
   searchPurchaseById,
   searchPurchaseByPage,
+  searchPurchaseByNanoId,
   removePurchaseById,
   copyPurchaseById,
   createPurchase,
   modifyPurchase,
+  batchAddNanoId
 };
