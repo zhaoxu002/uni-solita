@@ -62,7 +62,11 @@
           <div class="recommend" v-if="item.recommend">推荐</div>
           <div class="good-info">
             <div class="name">{{ item.name }}</div>
-            <div class="price">$ {{ item.price }}</div>
+            <div class="price">
+              $ {{ item.price }}
+              <!-- <text>/</text> -->
+              <span>/{{ item.unit || "个" }}</span>
+            </div>
             <div class="origin-price">{{ item.originPrice }}</div>
             <div class="stock">库存：{{ item.stock }}</div>
 
@@ -124,7 +128,10 @@
             />
             <div>
               <div class="name">{{ goodDetail.name }}</div>
-              <div class="price">$ {{ goodDetail.price }}</div>
+              <div class="price">
+                $ {{ goodDetail.price }}
+                <span>/{{ goodDetail.unit || "个" }}</span>
+              </div>
               <div class="origin-price">{{ item.originPrice }}</div>
 
               <div class="stock">库存：{{ goodDetail.stock }}</div>
@@ -817,6 +824,11 @@ $price: #f5222d;
 }
 .price {
   color: $price;
+
+  span {
+    font-size: 12px;
+    color: #999;
+  }
 }
 .stock {
   font-size: 12px;
