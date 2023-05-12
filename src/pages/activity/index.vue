@@ -5,7 +5,6 @@
   <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <view>
     <div class="head-img-container">
-      <!-- <img :src="qrcode" /> -->
       <img :src="headImages[0]" class="head-img" mode="aspectFill" lazy-load />
 
       <button class="share" size="mini" open-type="share" plain>
@@ -496,11 +495,15 @@ export default {
         })
         .then((res) => {
           if (res.result.success === true) {
-            wx.showModal({
-              title: "复制成功",
-              content: "请前往后台继续编辑",
-              showCancel: false,
-            });
+            // wx.showModal({
+            //   title: "复制成功",
+            //   content: "请前往后台继续编辑",
+            //   showCancel: false,
+            // });
+            const { _id } = res.result.data;
+            uni.navigateTo({
+              url: '/pages/edit/index?id=' + _id
+            })
           } else {
             wx.showToast({
               title: "复制失败",

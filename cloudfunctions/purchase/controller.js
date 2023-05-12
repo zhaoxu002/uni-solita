@@ -199,8 +199,8 @@ const copyPurchaseById = async (event) => {
       orderList: [],
       isDelete: true,
     };
-    await daoUtils.createOne(collection, newActivity);
-    return createSuccessResponse();
+    const result = await daoUtils.createOne(collection, newActivity);
+    return createSuccessResponse(result);
   } catch (error) {
     return createErrorResponse(error);
   }

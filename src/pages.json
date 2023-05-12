@@ -25,6 +25,12 @@
       "style": {
         "navigationBarTitleText": "确认订单"
       }
+    },
+    {
+      "path": "pages/edit/index",
+      "style": {
+        "navigationBarTitleText": "复制接龙"
+      }
     }
   ],
   "globalStyle": {
