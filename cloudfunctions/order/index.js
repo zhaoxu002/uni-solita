@@ -6,6 +6,7 @@ const {
   deleteOrderBySn,
   cancelOrderBySn,
   createOrder,
+  updateOrderComment,
   exportOrdersByPurchaseId,
 } = require("./controller");
 
@@ -27,5 +28,7 @@ exports.main = async (event, context) => {
       return await cancelOrderBySn(event, context);
     case "exportExcel":
       return await exportOrdersByPurchaseId(event, context);
+    case "updateOrderComment":
+      return await updateOrderComment(event, context);
   }
 };

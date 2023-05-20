@@ -203,9 +203,10 @@
       :isAuto="false"
       @drawSuccess="onDrawSuccess"
       :drawData="canvasData"
-      :width="960"
-      :height="1440"
+      :width="480"
+      :height="720"
     />
+
   </view>
 </template>
 
@@ -502,8 +503,8 @@ export default {
             // });
             const { _id } = res.result.data;
             uni.navigateTo({
-              url: '/pages/edit/index?id=' + _id
-            })
+              url: "/pages/edit/index?id=" + _id,
+            });
           } else {
             wx.showToast({
               title: "复制失败",
@@ -521,6 +522,7 @@ export default {
     },
 
     handleShareQr() {
+      uni.showLoading();
       wx.cloud
         .callFunction({
           name: "qrCode",
@@ -538,44 +540,44 @@ export default {
           } = await uni.cloud.getTempFileURL({
             fileList: [this.headImages[0]],
           });
-          console.log(headImage);
+          console.log('head',headImage);
           this.canvasData = [
             {
               type: "image",
               x: 0,
               y: 0,
               value: headImage.tempFileURL,
-              width: 960,
-              height: 960,
+              width: 480,
+              height: 480,
             },
             {
               type: "text",
-              x: 32,
-              y: 1032,
+              x: 16,
+              y: 524,
               value: this.title,
               color: "#262626",
-              lineMaxWidth: 850,
-              lineHeight: 60,
+              lineMaxWidth: 425,
+              lineHeight: 30,
               lineNum: 2,
-              font: "normal normal bold 48px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
+              font: "normal normal bold 24px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
             },
             {
               type: "text",
-              x: 32,
-              y: 1276,
+              x: 16,
+              y: 638,
               color: "#999",
               value: "长按扫码，参与接龙",
-              lineMaxWidth: 700,
-              lineHeight: 60,
+              lineMaxWidth: 350,
+              lineHeight: 30,
               lineNum: 2,
-              font: "normal normal bold 36px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
+              font: "normal normal bold 18px Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;",
             },
             {
               type: "image",
-              x: 628,
-              y: 1108,
-              width: 300,
-              height: 300,
+              x: 314,
+              y: 554,
+              width: 150,
+              height: 150,
               value: this.qrcode,
             },
           ];
@@ -585,7 +587,9 @@ export default {
     },
 
     onDrawSuccess(res) {
+      uni.hideLoading();
       this.handlePreviewImage(res);
+      this.tempImage = res
     },
   },
 };

@@ -280,20 +280,37 @@ const cancelOrderBySn = async (event, context) => {
       }
 
       try {
-        await Promise.all(
-          orderItems.map(async (orderItem) => {
-            const { itemId, itemQuantity } = orderItem;
-            await daoUtils.updateOne(itemCollection, itemId, {
-              stock: _.inc(itemQuantity),
-              saleCount: _.inc(-itemQuantity),
-            });
-          })
-        );
+        // await Promise.all(
+        //   orderItems.map(async (orderItem) => {
+        //     const { itemId, itemQuantity } = orderItem;
+        //     await daoUtils.updateOne(itemCollection, itemId, {
+        //       stock: _.inc(itemQuantity),
+        //       saleCount: _.inc(-itemQuantity),
+        //     });
+        //   })
+        // );
+        for (const orderItemVo of orderItems) {
+          const { itemId, itemQuantity } = orderItemVo;
+          await daoUtils.updateOne(itemCollection, itemId, {
+            stock: _.inc(itemQuantity),
+            saleCount: _.inc(-itemQuantity),
+          });
+        }
       } catch (error) {
         await transaction.rollback();
         throw error;
       }
     });
+    return createSuccessResponse();
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
+const updateOrderComment = async (event, context) => {
+  const { comment, id } = event;
+  try {
+    await daoUtils.updateOne(orderCollection, id, { note: comment });
     return createSuccessResponse();
   } catch (error) {
     return createErrorResponse(error);
@@ -307,6 +324,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
     .match({
       purchaseId: purchaseId,
       isDelete: _.not(_.eq(true)),
+      status: _.not(_.eq(5)),
     })
     .sort({
       detailAddress: -1,
@@ -401,5 +419,6 @@ module.exports = {
   deleteOrderBySn,
   cancelOrderBySn,
   createOrder,
+  updateOrderComment,
   exportOrdersByPurchaseId,
 };

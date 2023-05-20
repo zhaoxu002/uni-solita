@@ -1,4 +1,8 @@
 <template>
+  <page-meta
+    :page-style="'overflow:' + (show ? 'hidden' : 'visible')"
+  ></page-meta>
+  <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <div class="container">
     <div class="header-info">
       <div class="row">
@@ -32,7 +36,12 @@
       </div>
     </div>
     <div class="activity-list">
-      <div class="card" v-for="item of list" :key="item._id">
+      <div
+        class="card"
+        v-for="item of list"
+        :key="item._id"
+        :class="item.status === 5 && 'cancelled'"
+      >
         <div class="name" @click="handleCheckActivity(item.purchaseId)">
           {{ item.purchaseTitle }}
         </div>
@@ -43,6 +52,7 @@
               <div class="secondary">下单时间：{{ item.createTime }}</div>
             </div>
           </div>
+
           <div class="flex-line">
             <div>
               <div class="secondary">订单ID： {{ item.sn }}</div>
@@ -111,6 +121,27 @@
             </div>
           </div>
         </div>
+
+        <div v-if="item.status === 5" class="flex-end">订单已取消</div>
+
+        <div v-if="item.status !== 5" class="flex-end">
+          <button
+            size="mini"
+            plain
+            class="edit-btn"
+            @click="handleCancelOrder(item.sn)"
+          >
+            取消订单
+          </button>
+          <button
+            size="mini"
+            plain
+            class="edit-btn"
+            @click="handleUpdateComment(item)"
+          >
+            编辑备注
+          </button>
+        </div>
       </div>
 
       <uni-load-more
@@ -122,6 +153,18 @@
     <div class="contact-container">
       <button class="contact" open-type="contact">联系客服</button>
     </div>
+
+    <uni-popup ref="popup" type="dialog">
+      <uni-popup-dialog
+        v-if="commentInput"
+        ref="inputClose"
+        mode="input"
+        title="输入备注"
+        :value="commentInput"
+        placeholder="请输入内容"
+        @confirm="handleConfirmUpdate"
+      ></uni-popup-dialog>
+    </uni-popup>
   </div>
 </template>
 
@@ -137,6 +180,10 @@ export default {
       current: 1,
       pageSize: 20,
       total: 0,
+
+      show: false,
+      commentInput: "",
+      editing: "",
     };
   },
   onLoad() {
@@ -202,6 +249,13 @@ export default {
         });
     },
 
+    refreshPageData() {
+      this.current = 1;
+      this.total = 0;
+      this.list = [];
+      this.handleFetch();
+    },
+
     handleCheckActivity(id) {
       uni.navigateTo({
         url: "/pages/activity/index?id=" + id,
@@ -224,6 +278,78 @@ export default {
       uni.setClipboardData({
         data: sn,
       });
+    },
+
+    handleCancelOrder(sn) {
+      console.log(sn);
+      uni.showModal({
+        title: "确定要取消该订单吗？",
+        content: "取消后无法恢复，如有需要请重新下单",
+        success(res) {
+          if (res.confirm) {
+            console.log("用户点击确定");
+            this.loading = true;
+
+            wx.cloud
+              .callFunction({
+                name: "order",
+                data: {
+                  method: "cancelOrderBySn",
+                  sn,
+                },
+              })
+              .then((res) => {
+                console.log(res);
+                if (res.result.success) {
+                  // success
+                  uni.showToast({
+                    title: "更新成功",
+                    icon: "success",
+                    duration: 1000,
+                  });
+                  this.refreshPageData();
+                }
+              });
+          } else if (res.cancel) {
+            console.log("用户点击取消");
+          }
+        },
+      });
+    },
+
+    handleUpdateComment(item) {
+      this.commentInput = item.note;
+      this.editing = item._id;
+      this.$refs.popup.open();
+    },
+
+    handleConfirmUpdate(text) {
+      console.log(text);
+      this.loading = true;
+      wx.cloud
+        .callFunction({
+          name: "order",
+          data: {
+            method: "updateOrderComment",
+            comment: text,
+            id: this.editing,
+          },
+        })
+        .then((res) => {
+          if (res.result.success) {
+            // success
+            uni.showToast({
+              title: "更新成功",
+              icon: "success",
+              duration: 1000,
+            });
+
+            this.refreshPageData();
+          }
+        });
+    },
+    change(e) {
+      this.show = e.show;
     },
   },
 };
@@ -269,6 +395,10 @@ $price: #f5222d;
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
+
+  &.cancelled {
+    filter: grayscale(1) contrast(90%);
+  }
 
   .name {
     display: -webkit-box;
@@ -316,7 +446,7 @@ $price: #f5222d;
   justify-content: space-between;
 }
 .flex-line {
-    display: flex;
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
@@ -369,5 +499,15 @@ $price: #f5222d;
   background: #fff;
   z-index: 10000;
   box-sizing: border-box;
+}
+.flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.edit-btn {
+  margin-left: 8px;
+  margin-right: 0;
 }
 </style>
