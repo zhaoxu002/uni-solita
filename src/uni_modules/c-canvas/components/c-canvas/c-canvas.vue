@@ -23,6 +23,25 @@
 	 * */
 let ctx = null,
   thumb = null;
+
+const aspectFill = (imageWidth, imageHeight, canvasWidth, canvasHeight) => {
+  const imageRate = imageWidth / imageHeight;
+  const canvasRate = canvasWidth / canvasHeight;
+  let [sx, sy, sw, sh] = [];
+  if (imageRate >= canvasRate) {
+    sw = imageHeight * canvasRate;
+    sh = imageHeight;
+    sx = (imageWidth - sw) / 2;
+    sy = 0;
+  } else {
+    sh = imageWidth / canvasRate;
+    sw = imageWidth;
+    sx = 0;
+    sy = (imageHeight - sh) / 2;
+  }
+  return [sx, sy, sw, sh];
+};
+
 export default {
   name: "c-canvas",
   props: {
@@ -98,8 +117,17 @@ export default {
       } else {
         // #ifdef MP
         let imgBit = await this.loadImg(Img);
+
+        const [sx, sy, sw, sh] = aspectFill(
+          imgBit.naturalWidth,
+          imgBit.naturalHeight,
+          item.width,
+          item.height
+        );
+
         ctx.drawImage(
           imgBit,
+          sx, sy, sw, sh,
           item.x || 0,
           item.y || 0,
           item.width,
@@ -280,4 +308,3 @@ export default {
   top: -10000px;
 }
 </style>
-
