@@ -1,6 +1,6 @@
 const cloud = require("wx-server-sdk");
 const { nanoid } = require("nanoid");
-const xlsx = require("node-xlsx");
+const XLSX = require("xlsx");
 const getItemDescription = require("./utils/getItemDescription");
 const daoUtils = require("./utils/daoUtil");
 const { getTime } = require("./utils/getTime");
@@ -352,7 +352,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
     "总价",
     "备注",
   ];
-  let addressMapXlsxBody = new Map();
+  const addressMapXlsxBody = new Map();
   let purchaseTitle = "";
   for (let order of list) {
     const {
@@ -386,19 +386,51 @@ const exportOrdersByPurchaseId = async (event, context) => {
       addressMapXlsxBody.set(validDetailAddress, [curOrderDesc]);
     }
   }
+  const sheetOptions = {
+    "!cols": [
+      { width: 10 },
+      { width: 10 },
+      { width: 15 },
+      { width: 30 },
+      { width: 8 },
+      { width: 30 },
+    ],
+  };
 
-  const excelContent = Array.from(addressMapXlsxBody.entries()).map(
+  // const excelContent = Array.from(addressMapXlsxBody.entries()).map(
+  //   ([address, sheetContent]) => {
+  //     sheetContent.unshift(title);
+  //     return {
+  //       name: address.substring(0, 16),
+  //       data: sheetContent,
+  //     };
+  //   }
+  // );
+  console.log(addressMapXlsxBody);
+  const workBook = XLSX.utils.book_new();
+  Array.from(addressMapXlsxBody.entries()).forEach(
     ([address, sheetContent]) => {
       sheetContent.unshift(title);
-      return {
-        name: address.substring(0, 16),
-        data: sheetContent,
-      };
+      const sheet = XLSX.utils.aoa_to_sheet(sheetContent)
+      sheet['!cols'] = [
+        { wch: 10 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 50 },
+        { wch: 10 },
+        { wch: 30 },
+      ]
+      XLSX.utils.book_append_sheet(
+        workBook,
+        sheet,
+        address.substring(0, 16)
+      );
     }
   );
+  const buffer = XLSX.write(workBook, { type: "buffer", bookType: "xlsx" });
 
   try {
-    let buffer = await xlsx.build(excelContent);
+    // let buffer = xlsx.build(excelContent);
 
     const { fileID } = await cloud.uploadFile({
       cloudPath: `${purchaseTitle}-${Date.now()}.xlsx`,

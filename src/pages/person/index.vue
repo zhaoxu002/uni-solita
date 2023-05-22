@@ -285,7 +285,7 @@ export default {
       uni.showModal({
         title: "确定要取消该订单吗？",
         content: "取消后无法恢复，如有需要请重新下单",
-        success(res) {
+        success: (res) => {
           if (res.confirm) {
             console.log("用户点击确定");
             this.loading = true;

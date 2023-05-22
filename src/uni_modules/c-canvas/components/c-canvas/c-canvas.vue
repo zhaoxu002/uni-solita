@@ -118,12 +118,15 @@ export default {
         // #ifdef MP
         let imgBit = await this.loadImg(Img);
 
+        console.log(imgBit.width, imgBit.height)
+
         const [sx, sy, sw, sh] = aspectFill(
-          imgBit.naturalWidth,
-          imgBit.naturalHeight,
+          imgBit.naturalWidth || imgBit.width,
+          imgBit.naturalHeight || imgBit.height,
           item.width,
           item.height
         );
+
 
         ctx.drawImage(
           imgBit,
