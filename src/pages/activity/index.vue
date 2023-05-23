@@ -272,9 +272,10 @@ export default {
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    const { id, nanoid } = options;
-    if (nanoid) {
-      this.fetchByNanoId(nanoid);
+    const { id, scene } = options;
+
+    if (scene) {
+      this.fetch(decodeURIComponent(scene))
     } else {
       this.fetch(id);
     }
@@ -319,6 +320,7 @@ export default {
   },
   methods: {
     fetch(id) {
+      console.log('fetch')
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -332,6 +334,7 @@ export default {
         });
     },
     fetchByNanoId(nanoId) {
+      console.log('nanoid', nanoId)
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -528,7 +531,7 @@ export default {
           name: "qrCode",
           data: {
             page: "pages/activity/index",
-            scene: "nanoid=" + this.nanoId,
+            scene: this.activityId,
           },
         })
         .then(async (res) => {
