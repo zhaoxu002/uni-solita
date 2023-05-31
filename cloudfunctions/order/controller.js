@@ -433,7 +433,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
     // let buffer = xlsx.build(excelContent);
 
     const { fileID } = await cloud.uploadFile({
-      cloudPath: `${purchaseTitle}-${Date.now()}.xlsx`,
+      cloudPath: `${Date.now()}.xlsx`,
       fileContent: buffer,
     });
 
