@@ -6,13 +6,13 @@
       mode="aspectFill"
       show-menu-by-longpress
     ></image>
-    <uni-segmented-control
+    <!-- <uni-segmented-control
       :current="currentCategory"
       :values="categories"
       @clickItem="onClickCategory"
       styleType="text"
       activeColor="#f2828d"
-    ></uni-segmented-control>
+    ></uni-segmented-control> -->
     <view class="container">
       <view
         class="activity"
@@ -71,7 +71,7 @@ require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
-const Categories = ["baby", "life", "sale"];
+const Categories = ["default"];
 
 export default Vue.extend({
   data() {
@@ -85,7 +85,7 @@ export default Vue.extend({
       pageSize: 20,
       total: 0,
 
-      categories: ["母婴", "生活", "秒杀"],
+      categories: ["默认"],
       currentCategory: 0,
       category: Categories[0],
     };
@@ -103,7 +103,7 @@ export default Vue.extend({
    */
   onShareAppMessage() {
     return {
-      title: "Becky 好物推荐社",
+      title: "隔壁老王肉店",
       path: "/pages/index/index",
       imageUrl: "/static/cardbg.jpg",
     };
@@ -193,7 +193,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-bg {
   width: 100%;
-  height: 42vw;
+  height: 40vh;
 }
 
 .container {

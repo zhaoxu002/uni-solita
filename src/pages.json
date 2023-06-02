@@ -3,7 +3,7 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "Becky 好物推荐社",
+        "navigationBarTitleText": "隔壁老王肉店",
         "enablePullDownRefresh": true
       }
     },
@@ -34,13 +34,13 @@
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "white",
+    "navigationBarTextStyle": "black",
     "backgroundColor": "#fff",
-    "navigationBarBackgroundColor": "#fdabb3"
+    "navigationBarBackgroundColor": "#fff"
   },
   "tabBar": {
     "color": "#313d53",
-    "selectedColor": "#f88181",
+    "selectedColor": "#df659b",
     "list": [
       {
         "pagePath": "pages/index/index",

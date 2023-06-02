@@ -6,9 +6,9 @@
   <div class="container">
     <div class="header-info">
       <div class="row">
-        <div class="label">银行转账 ANZ:</div>
+        <div class="label">电话:</div>
         <div class="content">
-          06-0193-0903969-00
+          09-222-1199
 
           <div class="button" @click="handleCopyAccount">
             <uni-icons
@@ -21,9 +21,9 @@
       </div>
 
       <div class="row">
-        <div class="label">公司名称:</div>
+        <div class="label">地址:</div>
         <div class="content">
-          Salessmart Ltd
+          Unit C, 252 Oteha Valley Road, Albany 0632
 
           <div class="button" @click="handleCopyName">
             <uni-icons
@@ -374,6 +374,7 @@ $price: #f5222d;
   }
   .label {
     margin-right: 8px;
+    flex-shrink: 0;
   }
 
   .button {
