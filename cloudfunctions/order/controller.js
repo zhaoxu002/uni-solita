@@ -87,6 +87,10 @@ const searchOrderByUserOpenIdAndPage = async (event, context) => {
     list.forEach((order) => {
       order.purchaseTitle =
         (order.purchase[0] && order.purchase[0].title) || "已删除的接龙";
+      order.purchaseEndTime =
+        (order.purchase[0] && order.purchase[0].endTime) || 0;
+      order.purchaseDeliveryTime =
+        (order.purchase[0] && order.purchase[0].deliveryTime) || 0;
       delete order.purchase;
     });
     return createPageSuccessResponse(list, total);
@@ -411,20 +415,16 @@ const exportOrdersByPurchaseId = async (event, context) => {
   Array.from(addressMapXlsxBody.entries()).forEach(
     ([address, sheetContent]) => {
       sheetContent.unshift(title);
-      const sheet = XLSX.utils.aoa_to_sheet(sheetContent)
-      sheet['!cols'] = [
+      const sheet = XLSX.utils.aoa_to_sheet(sheetContent);
+      sheet["!cols"] = [
         { wch: 10 },
         { wch: 20 },
         { wch: 15 },
         { wch: 50 },
         { wch: 10 },
         { wch: 30 },
-      ]
-      XLSX.utils.book_append_sheet(
-        workBook,
-        sheet,
-        address.substring(0, 16)
-      );
+      ];
+      XLSX.utils.book_append_sheet(workBook, sheet, address.substring(0, 16));
     }
   );
   const buffer = XLSX.write(workBook, { type: "buffer", bookType: "xlsx" });

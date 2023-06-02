@@ -34,10 +34,13 @@
     <div class="container">
       <div class="info-container">
         <div class="title">{{ title }}</div>
-        <div class="status" v-if="isActivityEnd">
+        <div class="status" v-if="isActivityEnd && startTime">
           {{ formatStartTime }} 开始
         </div>
         <div v-if="endTime" class="status">{{ formatEndTime }} 结束</div>
+        <div class="status" v-if="deliveryTime">
+          {{ formatDeliveryTime }} 提货
+        </div>
         <mp-html
           class="rich-text"
           :tag-style="{
@@ -63,7 +66,6 @@
             <div class="name">{{ item.name }}</div>
             <div class="price">
               $ {{ item.price }}
-              <!-- <text>/</text> -->
               <span>/{{ item.unit || "个" }}</span>
             </div>
             <div class="origin-price">{{ item.originPrice }}</div>
@@ -206,7 +208,6 @@
       :width="480"
       :height="720"
     />
-
   </view>
 </template>
 
@@ -228,6 +229,7 @@ export default {
       description: "",
       endTime: 0,
       startTime: 0,
+      deliveryTime: 0,
       goods: [],
       records: [],
       headImages: [],
@@ -247,6 +249,9 @@ export default {
     },
     formatStartTime() {
       return dayjs(this.startTime).format("YYYY-MM-DD HH:mm:ss");
+    },
+    formatDeliveryTime() {
+      return dayjs(this.deliveryTime).format("YYYY-MM-DD HH:mm:ss");
     },
     selected() {
       const selectedGoods = this.goods.filter((item) => item.amount > 0);
@@ -275,7 +280,7 @@ export default {
     const { id, scene } = options;
 
     if (scene) {
-      this.fetch(decodeURIComponent(scene))
+      this.fetch(decodeURIComponent(scene));
     } else {
       this.fetch(id);
     }
@@ -320,7 +325,7 @@ export default {
   },
   methods: {
     fetch(id) {
-      console.log('fetch')
+      console.log("fetch");
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -334,7 +339,7 @@ export default {
         });
     },
     fetchByNanoId(nanoId) {
-      console.log('nanoid', nanoId)
+      console.log("nanoid", nanoId);
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -356,6 +361,7 @@ export default {
         locations,
         startTime,
         endTime,
+        deliveryTime,
         orderList,
         headImages,
         nanoId,
@@ -366,6 +372,7 @@ export default {
       this.nanoId = nanoId;
       this.endTime = endTime;
       this.startTime = startTime;
+      this.deliveryTime = deliveryTime;
       this.description = formatImage(description);
       this.title = title;
       this.goods = [
@@ -543,7 +550,7 @@ export default {
           } = await uni.cloud.getTempFileURL({
             fileList: [this.headImages[0]],
           });
-          console.log('head',headImage);
+          console.log("head", headImage);
           this.canvasData = [
             {
               type: "image",
@@ -592,7 +599,7 @@ export default {
     onDrawSuccess(res) {
       uni.hideLoading();
       this.handlePreviewImage(res);
-      this.tempImage = res
+      this.tempImage = res;
     },
   },
 };

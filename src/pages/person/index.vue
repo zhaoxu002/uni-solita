@@ -110,6 +110,11 @@
               </div>
             </div>
 
+            <div class="flex" v-if="item.purchaseDeliveryTime">
+              <div class="title">提货时间：</div>
+              <div class="content">{{ item.deliveryTime }}</div>
+            </div>
+
             <div class="flex">
               <div class="title">电话号码：</div>
               <div class="content">{{ item.userPhone }}</div>
@@ -124,7 +129,7 @@
 
         <div v-if="item.status === 5" class="flex-end">订单已取消</div>
 
-        <div v-if="item.status !== 5" class="flex-end">
+        <div v-if="item.status !== 5 && !item.isEnd" class="flex-end">
           <button
             size="mini"
             plain
@@ -175,7 +180,6 @@ export default {
   data() {
     return {
       list: [],
-
       loadingStatus: "more",
       current: 1,
       pageSize: 20,
@@ -227,6 +231,10 @@ export default {
                 createTime: dayjs(item.createTime).format(
                   "YYYY-MM-DD HH:mm:ss"
                 ),
+                deliveryTime: dayjs(item.purchaseDeliveryTime).format(
+                  "YYYY-MM-DD HH:mm:ss"
+                ),
+                isEnd: dayjs(item.purchaseEndTime).isBefore(dayjs()),
               };
             })
           );

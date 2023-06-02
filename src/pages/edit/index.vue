@@ -24,6 +24,15 @@
           >
           </uni-datetime-picker>
         </uni-forms-item>
+
+        <uni-forms-item label="提货时间" name="deliveryTime">
+          <uni-datetime-picker
+            v-model="formData.deliveryTime"
+            type="datetime"
+            returnType="timestamp"
+          >
+          </uni-datetime-picker>
+        </uni-forms-item>
       </uni-forms>
     </div>
     <div>
@@ -47,6 +56,7 @@ export default {
       formData: {
         startTime: 0,
         endTime: 0,
+        deliveryTime: undefined,
         title: "",
       },
       loading: false,
@@ -80,6 +90,7 @@ export default {
         title,
         startTime,
         endTime,
+        deliveryTime,
         // isDelete
         _id,
       } = res.result.data;
@@ -88,6 +99,7 @@ export default {
       this.formData = {
         startTime,
         endTime,
+        deliveryTime,
         title,
       };
     },
