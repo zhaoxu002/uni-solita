@@ -193,7 +193,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-bg {
   width: 100%;
-  height: 40vh;
+  height: 50vw;
 }
 
 .container {
