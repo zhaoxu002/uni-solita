@@ -52,6 +52,8 @@ const searchPurchaseById = async (event, context) => {
       .end();
     const [item] = list;
     const { orders, orderList, locations, ...rest } = item;
+
+    // TODO: optimize limit
     const res = {
       ...rest,
       orderList: orderList
@@ -65,7 +67,8 @@ const searchPurchaseById = async (event, context) => {
         })
         .sort((a, b) => {
           return b.createTime - a.createTime;
-        }),
+        })
+        .slice(0, 3),
       locations: locations.sort((a, b) => {
         return a.description.localeCompare(b.description, "zh");
       }),
@@ -87,7 +90,7 @@ const searchPurchaseByNanoId = async (event, context) => {
       .get();
 
     if (data.length === 0) {
-      return createErrorResponse('cannot found')
+      return createErrorResponse("cannot found");
     }
 
     const [record] = data;
@@ -141,7 +144,7 @@ const searchPurchaseByPage = async (event, context) => {
 
     const res = list.map((item) => {
       const { orders, orderList, ...rest } = item;
-
+      // TODO: optimize limit
       return {
         ...rest,
         orderList: orderList
@@ -155,7 +158,8 @@ const searchPurchaseByPage = async (event, context) => {
           })
           .sort((a, b) => {
             return b.createTime - a.createTime;
-          }),
+          })
+          .slice(0, 3),
       };
     });
 
@@ -231,24 +235,24 @@ const batchAddNanoId = async () => {
   try {
     const result = await db.runTransaction(async (transacation) => {
       try {
-        const collection = transacation.collection('purchase')
-        const list = await daoUtils.getList(collection, {})
+        const collection = transacation.collection("purchase");
+        const list = await daoUtils.getList(collection, {});
         for (const item of list) {
           await daoUtils.updateOne(collection, item._id, {
-            nanoId: nanoid(10)
-          })
+            nanoId: nanoid(10),
+          });
         }
       } catch (error) {
-        transacation.rollback()
-        throw error
+        transacation.rollback();
+        throw error;
       }
-    })
+    });
 
-    return createSuccessResponse(result)
+    return createSuccessResponse(result);
   } catch (error) {
-    return createErrorResponse(error)
+    return createErrorResponse(error);
   }
-}
+};
 
 module.exports = {
   searchPurchaseById,
@@ -258,5 +262,5 @@ module.exports = {
   copyPurchaseById,
   createPurchase,
   modifyPurchase,
-  batchAddNanoId
+  batchAddNanoId,
 };
