@@ -4,6 +4,7 @@ const XLSX = require("xlsx");
 const getItemDescription = require("./utils/getItemDescription");
 const daoUtils = require("./utils/daoUtil");
 const { getTime } = require("./utils/getTime");
+const { getItemAmount } = require("./utils/getItemAmount");
 const { Order, OrderItem } = require("./orderVo");
 const {
   createSuccessResponse,
@@ -427,6 +428,15 @@ const exportOrdersByPurchaseId = async (event, context) => {
       );
     }
   );
+
+  const itemsAmount = getItemAmount(list);
+  const itemsAmountSheet = XLSX.utils.aoa_to_sheet([
+    ["商品", "数量"],
+    ...itemsAmount,
+  ]);
+  itemsAmountSheet["!cols"] = [{ wch: 20 }, { wch: 10 }];
+  XLSX.utils.book_append_sheet(workBook, itemsAmountSheet, "info");
+
   const buffer = XLSX.write(workBook, { type: "buffer", bookType: "xlsx" });
 
   try {
