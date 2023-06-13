@@ -118,7 +118,7 @@ export default {
         // #ifdef MP
         let imgBit = await this.loadImg(Img);
 
-        console.log(imgBit.width, imgBit.height)
+        console.log(imgBit.width, imgBit.height);
 
         const [sx, sy, sw, sh] = aspectFill(
           imgBit.naturalWidth || imgBit.width,
@@ -127,10 +127,12 @@ export default {
           item.height
         );
 
-
         ctx.drawImage(
           imgBit,
-          sx, sy, sw, sh,
+          sx,
+          sy,
+          sw,
+          sh,
           item.x || 0,
           item.y || 0,
           item.width,
@@ -297,6 +299,11 @@ export default {
           }
         }
       }
+    },
+
+    clear() {
+      thumb = null
+      console.log("clear");
     },
   },
   mounted() {
