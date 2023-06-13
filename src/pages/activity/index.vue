@@ -297,12 +297,14 @@ export default {
   /**
    * 生命周期函数--监听页面隐藏
    */
-  onHide() {},
+  onHide() {
+    console.log('hide')
+  },
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload() {
-    // this.$store.commit('updateCart', [])
+    this.$refs.cCanvas.clear()
   },
   /**
    * 页面相关事件处理函数--监听用户下拉动作
@@ -599,7 +601,6 @@ export default {
     onDrawSuccess(res) {
       uni.hideLoading();
       this.handlePreviewImage(res);
-      this.tempImage = res;
     },
   },
 };
