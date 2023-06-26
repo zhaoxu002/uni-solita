@@ -16,7 +16,7 @@
           required
           v-if="cart.goods.length > 0"
         >
-          <input type="nickname" id="nickname-input" />
+          <input type="nickname" id="nickname-input" v-model="userNameInput"/>
           <div class="desc">
             请填写您的昵称，以便出现问题时卖家在群中找到你，沟通订单问题
           </div>
@@ -105,7 +105,7 @@ export default {
     return {
       id: "",
       formData: {},
-      input: "",
+      userNameInput: "",
       required: [
         {
           required: true,
@@ -120,6 +120,8 @@ export default {
   onLoad(options) {
     const { id } = options;
     this.id = id;
+
+    this.setUserInfo()
   },
 
   computed: {
@@ -190,6 +192,12 @@ export default {
 
               console.log("data", data);
 
+              this.saveUserInfo({
+                locationId: res.locationId,
+                userPhone: res.userPhone,
+                userName: nickName
+              })
+
               console.log('SUBMIT')
 
               wx.cloud
@@ -239,6 +247,28 @@ export default {
               this.loading = false;
             });
         });
+    },
+
+    setUserInfo() {
+      const info = uni.getStorageSync('userInfo')
+
+      if (info) {
+        const {
+          locationId,
+          userPhone,
+          userName
+        } = info
+
+        if (this.locationList.some(item => item.value === locationId)) {
+          this.formData.locationId = locationId
+        }
+        this.formData.userPhone = userPhone
+        this.userNameInput = userName
+      }
+    },
+
+    saveUserInfo(info) {
+      uni.setStorageSync('userInfo', info)
     },
 
     handleCheckboxChange(e) {

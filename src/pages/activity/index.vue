@@ -29,6 +29,14 @@
       >
         分享图片
       </button>
+      <button
+        v-if="isAdmin && !isActivityEnd"
+        size="mini"
+        class="close-btn"
+        @click="handleCloseActivity"
+      >
+        结束接龙
+      </button>
     </div>
 
     <div class="container">
@@ -293,13 +301,13 @@ export default {
    * 生命周期函数--监听页面隐藏
    */
   onHide() {
-    console.log('hide')
+    console.log("hide");
   },
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload() {
-    this.$refs.cCanvas.clear()
+    this.$refs.cCanvas.clear();
   },
   /**
    * 页面相关事件处理函数--监听用户下拉动作
@@ -595,6 +603,39 @@ export default {
       uni.hideLoading();
       this.handlePreviewImage(res);
     },
+
+    handleCloseActivity() {
+      uni.showModal({
+        title: "确定要关闭接龙吗？",
+        content: "关闭后若要再次开启请前往电脑后台",
+        showCancel: true,
+        success: () => {
+          wx.cloud
+            .callFunction({
+              name: "purchase",
+              data: {
+                method: "updateOne",
+                _id: this.activityId,
+                data: {
+                  endTime: Date.now(),
+                },
+              },
+            })
+            .then((res) => {
+              if (res.result.success) {
+                uni.showToast({
+                  title: "关闭成功",
+                });
+                this.fetch(this.activityId)
+              } else {
+                uni.showToast({
+                  title: "关闭失败",
+                });
+              }
+            });
+        },
+      });
+    },
   },
 };
 </script>
@@ -630,6 +671,12 @@ $price: #f5222d;
     position: absolute;
     bottom: 64px;
     right: 216px;
+  }
+
+  .close-btn {
+    position: absolute;
+    bottom: 64px;
+    right: 100px;
   }
 
   .head-img {
