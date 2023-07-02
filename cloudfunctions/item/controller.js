@@ -97,6 +97,26 @@ const startSellItem = async (event, context) => {
   }
 };
 
+const reloadStock = async (event, context) => {
+  const { ids } = event;
+  const items = await daoUtils.getList(collection, {
+    _id: _.in(ids),
+  });
+  const itemsHasDefaultStock = items.filter((item) => {
+    return item.defaultStock > 0;
+  });
+  try {
+    for (const item of itemsHasDefaultStock) {
+      await daoUtils.updateOne(collection, item._id, {
+        stock: item.defaultStock,
+      });
+    }
+    return createSuccessResponse();
+  } catch (e) {
+    return createErrorResponse(e);
+  }
+};
+
 module.exports = {
   searchItemById,
   searchItemsByPage,
@@ -104,4 +124,5 @@ module.exports = {
   createItem,
   stopSellItem,
   startSellItem,
+  reloadStock,
 };

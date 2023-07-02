@@ -37,6 +37,9 @@
       >
         结束接龙
       </button>
+      <button v-if="isAdmin" size="mini" class="reload-btn" @click="handleReloadStock">
+        重置商品默认库存
+      </button>
     </div>
 
     <div class="container">
@@ -633,10 +636,41 @@ export default {
                 uni.showToast({
                   title: "关闭成功",
                 });
-                this.fetch(this.activityId)
+                this.fetch(this.activityId);
               } else {
                 uni.showToast({
                   title: "关闭失败",
+                });
+              }
+            });
+        },
+      });
+    },
+
+    handleReloadStock() {
+      uni.showModal({
+        title: "确定要重置商品默认库存吗？",
+        content:
+          "将重置接龙内所有的商品的库存为其默认库存数量，默认库存请在后台设置",
+        showCancel: true,
+        success: () => {
+          wx.cloud
+            .callFunction({
+              name: "item",
+              data: {
+                method: "reloadStock",
+                ids: this.goods.map((item) => item._id),
+              },
+            })
+            .then((res) => {
+              if (res.result.success) {
+                uni.showToast({
+                  title: "重置成功",
+                });
+                this.fetch(this.activityId);
+              } else {
+                uni.showToast({
+                  title: "重置失败",
                 });
               }
             });
@@ -683,6 +717,12 @@ $price: #f5222d;
   .close-btn {
     position: absolute;
     bottom: 64px;
+    right: 100px;
+  }
+
+  .reload-btn {
+    position: absolute;
+    bottom: 96px;
     right: 100px;
   }
 

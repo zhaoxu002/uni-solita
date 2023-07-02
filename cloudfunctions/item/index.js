@@ -5,21 +5,24 @@ const {
   createItem,
   stopSellItem,
   startSellItem,
-} = require('./controller');
+  reloadStock,
+} = require("./controller");
 
 exports.main = async (event, context) => {
   switch (event.method) {
-    case 'getOne':
+    case "getOne":
       return await searchItemById(event, context);
-    case 'getListByPage':
+    case "getListByPage":
       return await searchItemsByPage(event, context);
-    case 'removeOne':
+    case "removeOne":
       return await removeItemById(event, context);
-    case 'createOne':
+    case "createOne":
       return await createItem(event, context);
-    case 'stopSell':
+    case "stopSell":
       return await stopSellItem(event, context);
-    case 'startSell':
+    case "startSell":
       return await startSellItem(event, context);
+    case "reloadStock":
+      return await reloadStock(event, context);
   }
 };
