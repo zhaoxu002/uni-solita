@@ -53,6 +53,14 @@ const searchPurchaseById = async (event, context) => {
     const [item] = list;
     const { items, orders, orderList, locations, ...rest } = item;
 
+    // sort item
+    const sortedItems = items.sort((a, b) => {
+
+      if (!a.displayOrder) return 1
+      if (!b.displayOrder) return -1
+      return a.displayOrder - b.displayOrder
+    })
+
     // TODO: optimize limit
     const res = {
       ...rest,
@@ -72,7 +80,7 @@ const searchPurchaseById = async (event, context) => {
       locations: locations.sort((a, b) => {
         return a.description.localeCompare(b.description, "zh");
       }),
-      items: items.filter(i => {
+      items: sortedItems.filter(i => {
         return i.stock > 0
       })
     };
