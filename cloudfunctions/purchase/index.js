@@ -6,7 +6,8 @@ const {
   createPurchase,
   modifyPurchase,
   copyPurchaseById,
-  batchAddNanoId
+  batchAddNanoId,
+  searchAllByPage
 } = require("./controller");
 
 exports.main = async (event, context) => {
@@ -27,5 +28,7 @@ exports.main = async (event, context) => {
       return await copyPurchaseById(event, context);
     case 'batchAddNanoId':
       return await batchAddNanoId(event, context);
+    case 'getAllByPage':
+      return await searchAllByPage(event, context);
   }
 };

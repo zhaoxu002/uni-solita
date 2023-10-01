@@ -179,6 +179,47 @@ const searchPurchaseByPage = async (event, context) => {
   }
 };
 
+const searchAllByPage = async (event, context) => {
+  const {
+    query,
+    pageQuery: { curPage, limit },
+  } = event;
+  try {
+    const [{ list }, { total }] = await Promise.all([
+      collection
+        .aggregate()
+        .match({
+          ...query,
+        })
+        .sort({
+          _createTime: -1,
+        })
+        .skip((curPage - 1) * limit)
+        .limit(limit)
+        .end(),
+
+      collection
+        .where({
+          ...query,
+        })
+        .count(),
+    ]);
+
+    const res = list.map((item) => {
+      const { ...rest } = item;
+
+      return {
+        ...rest,
+      };
+    });
+
+    return createPageSuccessResponse(res, total);
+  } catch (error) {
+    console.log(error);
+    return createErrorResponse(error);
+  }
+}
+
 const removePurchaseById = async (event, context) => {
   const { _id } = event;
   try {
@@ -271,5 +312,6 @@ module.exports = {
   copyPurchaseById,
   createPurchase,
   modifyPurchase,
-  batchAddNanoId
+  batchAddNanoId,
+  searchAllByPage
 };

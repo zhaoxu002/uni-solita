@@ -17,7 +17,7 @@
       <view
         class="activity"
         v-for="(item, index) in activities"
-        :key="index"
+        :key="item._id"
         @tap="handleCheckDetail(item._id)"
       >
         <div class="info-content">

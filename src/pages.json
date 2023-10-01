@@ -31,6 +31,12 @@
       "style": {
         "navigationBarTitleText": "复制接龙"
       }
+    },
+    {
+      "path": "pages/list/index",
+      "style": {
+        "navigationBarTitleText": "全部接龙"
+      }
     }
   ],
   "globalStyle": {

@@ -34,6 +34,10 @@
           </div>
         </div>
       </div>
+
+      <div class="row" v-if="isAdmin">
+        <button class="contact" @click="handleCheckAllActivities">查看全部接龙</button>
+      </div>
     </div>
     <div class="activity-list">
       <div
@@ -184,14 +188,16 @@ export default {
       current: 1,
       pageSize: 20,
       total: 0,
-
+      isAdmin: false,
       show: false,
       commentInput: "",
       editing: "",
     };
   },
-  onLoad() {
+  mounted() {
     this.handleFetch();
+
+    this.checkIsAdmin();
   },
 
   onReachBottom() {
@@ -206,6 +212,17 @@ export default {
   },
 
   methods: {
+    checkIsAdmin() {
+      console.log('admin')
+      wx.cloud
+        .callFunction({
+          name: "checkIsAdmin",
+        })
+        .then((res) => {
+          console.log(res);
+          this.isAdmin = res.result.isAdmin;
+        });
+    },
     handleFetch() {
       if (this.loadingStatus === "loading") return;
 
@@ -272,13 +289,13 @@ export default {
 
     handleCopyAccount() {
       uni.setClipboardData({
-        data: "06-0193-0903969-00",
+        data: "09-222-1199",
       });
     },
 
     handleCopyName() {
       uni.setClipboardData({
-        data: "Salessmart Ltd",
+        data: "Unit C, 252 Oteha Valley Road, Albany 0632",
       });
     },
 
@@ -358,6 +375,12 @@ export default {
     },
     change(e) {
       this.show = e.show;
+    },
+
+    handleCheckAllActivities() {
+      uni.navigateTo({
+        url: "/pages/list/index",
+      });
     },
   },
 };

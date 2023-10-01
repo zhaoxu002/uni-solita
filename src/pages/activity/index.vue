@@ -37,7 +37,12 @@
       >
         结束接龙
       </button>
-      <button v-if="isAdmin" size="mini" class="reload-btn" @click="handleReloadStock">
+      <button
+        v-if="isAdmin"
+        size="mini"
+        class="reload-btn"
+        @click="handleReloadStock"
+      >
         重置商品默认库存
       </button>
     </div>
@@ -619,30 +624,32 @@ export default {
         title: "确定要关闭接龙吗？",
         content: "关闭后若要再次开启请前往电脑后台",
         showCancel: true,
-        success: () => {
-          wx.cloud
-            .callFunction({
-              name: "purchase",
-              data: {
-                method: "updateOne",
-                _id: this.activityId,
+        success: (action) => {
+          if (action.confirm) {
+            wx.cloud
+              .callFunction({
+                name: "purchase",
                 data: {
-                  endTime: Date.now(),
+                  method: "updateOne",
+                  _id: this.activityId,
+                  data: {
+                    endTime: Date.now(),
+                  },
                 },
-              },
-            })
-            .then((res) => {
-              if (res.result.success) {
-                uni.showToast({
-                  title: "关闭成功",
-                });
-                this.fetch(this.activityId);
-              } else {
-                uni.showToast({
-                  title: "关闭失败",
-                });
-              }
-            });
+              })
+              .then((res) => {
+                if (res.result.success) {
+                  uni.showToast({
+                    title: "关闭成功",
+                  });
+                  this.fetch(this.activityId);
+                } else {
+                  uni.showToast({
+                    title: "关闭失败",
+                  });
+                }
+              });
+          }
         },
       });
     },
@@ -653,27 +660,30 @@ export default {
         content:
           "将重置接龙内所有的商品的库存为其默认库存数量，默认库存请在后台设置",
         showCancel: true,
-        success: () => {
-          wx.cloud
-            .callFunction({
-              name: "item",
-              data: {
-                method: "reloadStock",
-                ids: this.goods.map((item) => item._id),
-              },
-            })
-            .then((res) => {
-              if (res.result.success) {
-                uni.showToast({
-                  title: "重置成功",
-                });
-                this.fetch(this.activityId);
-              } else {
-                uni.showToast({
-                  title: "重置失败",
-                });
-              }
-            });
+        success: (action) => {
+          if (action.confirm) {
+            wx.cloud
+              .callFunction({
+                name: "item",
+                data: {
+                  method: "reloadStock",
+                  ids: this.goods.map((item) => item._id),
+                },
+              })
+              .then((res) => {
+                if (res.result.success) {
+                  uni.showToast({
+                    title: "重置成功",
+                  });
+                  this.fetch(this.activityId);
+                } else {
+                  uni.showToast({
+                    title: "重置失败",
+                  });
+                }
+              });
+          }
+
         },
       });
     },
