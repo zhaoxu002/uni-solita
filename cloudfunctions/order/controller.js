@@ -352,6 +352,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
     "商品*数量",
     "总价",
     "备注",
+    "下单时间",
   ];
   const addressMapXlsxBody = new Map();
   let purchaseTitle = "";
@@ -364,6 +365,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
       totalAmount,
       detailAddress,
       note,
+      createTime,
     } = order;
     const validDetailAddress = detailAddress.replace("/", "-");
     if (!purchase[0]) {
@@ -373,6 +375,11 @@ const exportOrdersByPurchaseId = async (event, context) => {
     if (!purchaseTitle) {
       purchaseTitle = curPurchaseTitle;
     }
+
+    const date = new Date(createTime);
+    const dateOptions = { month: "2-digit", day: "2-digit" };
+    const dateString = date.toLocaleDateString("en-US", dateOptions);
+
     const curOrderDesc = [
       curPurchaseTitle,
       userName,
@@ -380,6 +387,7 @@ const exportOrdersByPurchaseId = async (event, context) => {
       getItemDescription(orderItems),
       totalAmount,
       note,
+      dateString,
     ];
     if (addressMapXlsxBody.has(validDetailAddress)) {
       addressMapXlsxBody.get(validDetailAddress).push(curOrderDesc);
@@ -387,16 +395,16 @@ const exportOrdersByPurchaseId = async (event, context) => {
       addressMapXlsxBody.set(validDetailAddress, [curOrderDesc]);
     }
   }
-  const sheetOptions = {
-    "!cols": [
-      { width: 10 },
-      { width: 10 },
-      { width: 15 },
-      { width: 30 },
-      { width: 8 },
-      { width: 30 },
-    ],
-  };
+  // const sheetOptions = {
+  //   "!cols": [
+  //     { width: 10 },
+  //     { width: 10 },
+  //     { width: 15 },
+  //     { width: 30 },
+  //     { width: 8 },
+  //     { width: 30 },
+  //   ],
+  // };
 
   // const excelContent = Array.from(addressMapXlsxBody.entries()).map(
   //   ([address, sheetContent]) => {
@@ -412,20 +420,34 @@ const exportOrdersByPurchaseId = async (event, context) => {
   Array.from(addressMapXlsxBody.entries()).forEach(
     ([address, sheetContent]) => {
       sheetContent.unshift(title);
-      const sheet = XLSX.utils.aoa_to_sheet(sheetContent)
-      sheet['!cols'] = [
+      const sheet = XLSX.utils.aoa_to_sheet(sheetContent);
+      sheet["!cols"] = [
         { wch: 10 },
         { wch: 20 },
         { wch: 15 },
         { wch: 50 },
         { wch: 10 },
         { wch: 30 },
-      ]
-      XLSX.utils.book_append_sheet(
-        workBook,
-        sheet,
-        address.substring(0, 16)
-      );
+        { wch: 30 },
+      ];
+
+      // 遍历每个单元格，设置对齐方式为换行
+      const range = XLSX.utils.decode_range(sheet["!ref"]);
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+          const cell = sheet[cellAddress];
+          if (cell) {
+            cell.s = {
+              alignment: {
+                wrapText: true,
+              },
+            };
+          }
+        }
+      }
+
+      XLSX.utils.book_append_sheet(workBook, sheet, address.substring(0, 16));
     }
   );
 
