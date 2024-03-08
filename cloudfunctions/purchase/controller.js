@@ -16,6 +16,7 @@ cloud.init({
 const db = cloud.database();
 const _ = db.command;
 const collection = db.collection("purchase");
+const investigateMode = db.collection("investigate-mode");
 
 const searchPurchaseById = async (event, context) => {
   const { _id } = event;
@@ -173,6 +174,13 @@ const searchPurchaseByPage = async (event, context) => {
           .slice(0, 3),
       };
     });
+
+    const investigating = await daoUtils.getOne(investigateMode, 'production')
+    console.log('inve', investigating)
+
+    if (investigating.mode === true) {
+      return createPageSuccessResponse([], 0)
+    }
 
     return createPageSuccessResponse(res, total);
   } catch (error) {
