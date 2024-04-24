@@ -11,7 +11,8 @@ export default Vue.extend({
         // 1.production - 正式
         // 2.test    - 测试
         // env: 'test-6guvdos0d2e13c77',
-        env: "production-2gohghtr3e52cd68",
+        // env: "production-2gohghtr3e52cd68",
+        env: "cloud1-4gry2oed29261785",
         traceUser: true,
       });
     }

@@ -3,7 +3,7 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "Becky 好物推荐社",
+        "navigationBarTitleText": "微醺 Merry",
         "enablePullDownRefresh": true
       }
     },
