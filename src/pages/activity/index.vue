@@ -37,7 +37,12 @@
       >
         结束接龙
       </button>
-      <button v-if="isAdmin" size="mini" class="reload-btn" @click="handleReloadStock">
+      <button
+        v-if="isAdmin"
+        size="mini"
+        class="reload-btn"
+        @click="handleReloadStock"
+      >
         重置商品默认库存
       </button>
     </div>
@@ -59,8 +64,18 @@
         ></mp-html>
       </div>
 
+      <div>
+        <uni-segmented-control
+          :current="currentCategory"
+          :values="categoryLabels"
+          @clickItem="onSelectCategory"
+          styleType="text"
+          activeColor="#f2828d"
+        ></uni-segmented-control>
+      </div>
+
       <div class="good-container">
-        <div class="good" v-for="item of goods" :key="item._id">
+        <div class="good" v-for="item of activeGoodsList" :key="item._id">
           <img
             class="good-img"
             lazy-load
@@ -217,7 +232,6 @@
       :width="480"
       :height="720"
     />
-
   </view>
 </template>
 
@@ -227,6 +241,14 @@ import formatImage from "@/utils/formatHTMLImage";
 import dayjs from "dayjs";
 import mpHtml from "@/uni_modules/mp-html/components/mp-html/mp-html.vue";
 import cCanvas from "@/uni_modules/c-canvas/components/c-canvas/c-canvas.vue";
+import { ALL_CATEGORIES } from "@/constants/category";
+
+const defaultCategories = [
+  {
+    value: "all",
+    label: "全部",
+  },
+];
 
 export default {
   components: { mpHtml, cCanvas },
@@ -249,6 +271,9 @@ export default {
 
       qrcode: "",
       canvasData: [],
+
+      categories: defaultCategories,
+      currentCategory: 0,
     };
   },
 
@@ -278,6 +303,16 @@ export default {
     isActivityEnd() {
       return this.endTime < this.now || this.startTime > this.now;
     },
+
+    categoryLabels() {
+      return this.categories.map(item => item.label)
+    },
+
+    activeGoodsList() {
+      if (this.currentCategory === 0) return this.goods;
+      const selectedCategory = this.categories[this.currentCategory]
+      return this.goods.filter(item => item.category === selectedCategory.value)
+    }
   },
   /**
    * 生命周期函数--监听页面加载
@@ -286,7 +321,7 @@ export default {
     const { id, scene } = options;
 
     if (scene) {
-      this.fetch(decodeURIComponent(scene))
+      this.fetch(decodeURIComponent(scene));
     } else {
       this.fetch(id);
     }
@@ -333,7 +368,7 @@ export default {
   },
   methods: {
     fetch(id) {
-      console.log('fetch')
+      console.log("fetch");
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -347,7 +382,7 @@ export default {
         });
     },
     fetchByNanoId(nanoId) {
-      console.log('nanoid', nanoId)
+      console.log("nanoid", nanoId);
       wx.cloud
         .callFunction({
           name: "purchase",
@@ -381,6 +416,7 @@ export default {
       this.startTime = startTime;
       this.description = formatImage(description);
       this.title = title;
+
       this.goods = [
         ...items.filter((i) => i.recommend === true),
         ...items.filter((i) => !i.recommend),
@@ -390,6 +426,7 @@ export default {
           amount: 0,
         };
       });
+
       this.records = orderList.map((order) => {
         return {
           ...order,
@@ -405,6 +442,18 @@ export default {
       });
       this.headImages = headImages;
       store.commit("updateLocationList", locations);
+
+      const categories = defaultCategories.concat(
+        ALL_CATEGORIES.filter((category) => {
+          return items.some((item) => item.category === category.value);
+        })
+      );
+
+      this.categories = categories;
+    },
+
+    onSelectCategory(e) {
+      this.currentCategory = e.currentIndex;
     },
 
     checkIsAdmin() {
@@ -556,7 +605,7 @@ export default {
           } = await uni.cloud.getTempFileURL({
             fileList: [this.headImages[0]],
           });
-          console.log('head',headImage);
+          console.log("head", headImage);
           this.canvasData = [
             {
               type: "image",

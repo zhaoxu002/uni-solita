@@ -6,13 +6,13 @@
       mode="aspectFill"
       show-menu-by-longpress
     ></image>
-    <uni-segmented-control
+    <!-- <uni-segmented-control
       :current="currentCategory"
       :values="categories"
       @clickItem="onClickCategory"
       styleType="text"
       activeColor="#f2828d"
-    ></uni-segmented-control>
+    ></uni-segmented-control> -->
     <view class="container">
       <view
         class="activity"
@@ -71,7 +71,7 @@ require("dayjs/locale/zh-cn");
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
-const Categories = ["baby", "life", "sale"];
+// const Categories = ["baby", "life", "sale"];
 
 export default Vue.extend({
   data() {
@@ -85,9 +85,9 @@ export default Vue.extend({
       pageSize: 20,
       total: 0,
 
-      categories: ["母婴", "生活", "秒杀"],
-      currentCategory: 0,
-      category: Categories[0],
+      // categories: ["母婴", "生活", "秒杀"],
+      // currentCategory: 0,
+      // category: Categories[0],
     };
   },
   onLoad() {
@@ -112,13 +112,13 @@ export default Vue.extend({
     this.handleGetActivities();
   },
   methods: {
-    onClickCategory(e) {
-      this.currentCategory = e.currentIndex;
-      this.category = Categories[e.currentIndex];
-      this.current = 1;
-      this.total = 0;
-      this.handleGetActivities(true);
-    },
+    // onClickCategory(e) {
+    //   this.currentCategory = e.currentIndex;
+    //   this.category = Categories[e.currentIndex];
+    //   this.current = 1;
+    //   this.total = 0;
+    //   this.handleGetActivities(true);
+    // },
     handleGetActivities(reset = false) {
       if (this.loadingStatus === "loading") return;
 
@@ -128,9 +128,9 @@ export default Vue.extend({
           name: "purchase",
           data: {
             method: "getListByPage",
-            query: {
-              category: this.category,
-            },
+            // query: {
+            //   category: this.category,
+            // },
             pageQuery: { curPage: this.current, limit: this.pageSize },
           },
         })
