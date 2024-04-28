@@ -475,6 +475,59 @@ const exportOrdersByPurchaseId = async (event, context) => {
   }
 };
 
+const searchOrdersByPurchaseId = async (event) => {
+  const { purchaseId, pageQuery: { curPage = 1, limit = 10 } = {} } = event;
+  const { list } = await orderCollection
+    .aggregate()
+    .match({
+      purchaseId: purchaseId,
+      isDelete: _.not(_.eq(true)),
+      status: _.not(_.eq(5)),
+    })
+    .sort({
+      createTime: -1,
+    })
+    .skip((curPage - 1) * limit)
+    .limit(limit)
+    .lookup({
+      from: "orderItem",
+      localField: "sn",
+      foreignField: "orderSn",
+      as: "orderItems",
+    })
+    .end();
+
+  const body = [];
+
+  for (let order of list) {
+    const {
+      userName,
+      userPhone,
+      orderItems,
+      totalAmount,
+      detailAddress,
+      note,
+      createTime,
+      sn
+    } = order;
+
+    const curOrder = {
+      userName,
+      userPhone,
+      items: getItemDescription(orderItems),
+      totalAmount,
+      note,
+      createTime,
+      detailAddress,
+      sn
+    };
+
+    body.push(curOrder);
+  }
+
+  return createSuccessResponse(body);
+};
+
 module.exports = {
   searchOrderBySn,
   searchOrderByUserOpenIdAndPage,
@@ -485,4 +538,5 @@ module.exports = {
   createOrder,
   updateOrderComment,
   exportOrdersByPurchaseId,
+  searchOrdersByPurchaseId,
 };

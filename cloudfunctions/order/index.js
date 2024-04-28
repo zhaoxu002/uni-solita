@@ -8,6 +8,7 @@ const {
   createOrder,
   updateOrderComment,
   exportOrdersByPurchaseId,
+  searchOrdersByPurchaseId
 } = require("./controller");
 
 exports.main = async (event, context) => {
@@ -30,5 +31,7 @@ exports.main = async (event, context) => {
       return await exportOrdersByPurchaseId(event, context);
     case "updateOrderComment":
       return await updateOrderComment(event, context);
+    case "searchOrdersByPurchaseId":
+      return await searchOrdersByPurchaseId(event, context)
   }
 };

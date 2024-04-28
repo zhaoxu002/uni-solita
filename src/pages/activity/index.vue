@@ -45,6 +45,9 @@
       >
         重置商品默认库存
       </button>
+      <button v-if="isAdmin" class="order-btn" size="mini" @click="handleCheckOrders">
+        查看订单信息
+      </button>
     </div>
 
     <div class="container">
@@ -305,14 +308,16 @@ export default {
     },
 
     categoryLabels() {
-      return this.categories.map(item => item.label)
+      return this.categories.map((item) => item.label);
     },
 
     activeGoodsList() {
       if (this.currentCategory === 0) return this.goods;
-      const selectedCategory = this.categories[this.currentCategory]
-      return this.goods.filter(item => item.category === selectedCategory.value)
-    }
+      const selectedCategory = this.categories[this.currentCategory];
+      return this.goods.filter(
+        (item) => item.category === selectedCategory.value
+      );
+    },
   },
   /**
    * 生命周期函数--监听页面加载
@@ -719,6 +724,12 @@ export default {
         },
       });
     },
+
+    handleCheckOrders() {
+      uni.navigateTo({
+        url: "/pages/orderStatus/index?id=" + this.activityId,
+      });
+    },
   },
 };
 </script>
@@ -744,6 +755,7 @@ $price: #f5222d;
     bottom: 32px;
     right: 100px;
   }
+
   .copy {
     position: absolute;
     bottom: 32px;
@@ -768,6 +780,12 @@ $price: #f5222d;
     right: 100px;
   }
 
+  .order-btn {
+    position: absolute;
+    bottom: 96px;
+    right: 216px;
+  }
+
   .head-img {
     width: 100vw;
     height: 200px;
@@ -784,11 +802,15 @@ $price: #f5222d;
     }
   }
 }
+
 .container {
   background: #f7f9fa;
-  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
-  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
+  padding-bottom: constant(safe-area-inset-bottom);
+  /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom);
+  /*兼容 IOS>11.2*/
 }
+
 .info-container {
   margin: 0 16px;
   padding: 16px;
@@ -811,6 +833,7 @@ $price: #f5222d;
 .rich-text {
   width: 100%;
 }
+
 [alt] {
   max-width: 100%;
 }
@@ -874,9 +897,11 @@ $price: #f5222d;
 .padding-16 {
   padding: 16px;
 }
+
 .margin-bottom-60 {
   margin-bottom: 60px;
 }
+
 .good-image {
   width: 80px;
   height: 80px;
@@ -898,10 +923,13 @@ $price: #f5222d;
     font-weight: bold;
   }
 }
+
 .bottom-bar {
   /* padding-bottom: ; */
-  padding-bottom: constant(safe-area-inset-bottom); /*兼容 IOS<11.2*/
-  padding-bottom: env(safe-area-inset-bottom); /*兼容 IOS>11.2*/
+  padding-bottom: constant(safe-area-inset-bottom);
+  /*兼容 IOS<11.2*/
+  padding-bottom: env(safe-area-inset-bottom);
+  /*兼容 IOS>11.2*/
   position: fixed;
   bottom: 0;
   width: 100vw;
@@ -945,6 +973,7 @@ $price: #f5222d;
   padding: 16px;
   padding-bottom: 70px;
 }
+
 .selected-item {
   display: flex;
   margin-bottom: 8px;
@@ -966,9 +995,11 @@ $price: #f5222d;
     }
   }
 }
+
 .space {
   height: 66px;
 }
+
 .price {
   color: $price;
 
@@ -977,14 +1008,17 @@ $price: #f5222d;
     color: #999;
   }
 }
+
 .stock {
   font-size: 12px;
   color: #666;
   margin: 4px 0;
 }
+
 .good-info {
   padding: 8px;
 }
+
 .order {
   font-size: 14px;
   display: flex;
@@ -992,12 +1026,15 @@ $price: #f5222d;
   line-height: 1.8;
   justify-content: space-between;
 }
+
 .font14 {
   font-size: 14px;
 }
+
 .line {
   display: flex;
 }
+
 .ellipsis {
   width: 30vw;
   overflow: hidden;
