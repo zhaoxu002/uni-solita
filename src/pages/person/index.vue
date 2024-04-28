@@ -6,9 +6,9 @@
   <div class="container">
     <div class="header-info">
       <div class="row">
-        <div class="label">银行转账 ANZ:</div>
+        <div class="label">银行转账:</div>
         <div class="content">
-          06-0193-0903969-00
+          {{ accountText }}
 
           <div class="button" @click="handleCopyAccount">
             <uni-icons
@@ -21,9 +21,9 @@
       </div>
 
       <div class="row">
-        <div class="label">公司名称:</div>
+        <div class="label">名称:</div>
         <div class="content">
-          Salessmart Ltd
+          {{ nameText }}
 
           <div class="button" @click="handleCopyName">
             <uni-icons
@@ -184,6 +184,9 @@ export default {
       show: false,
       commentInput: "",
       editing: "",
+
+      accountText: "03-1398-0045878-00",
+      nameText: "justin han",
     };
   },
   onLoad() {
@@ -264,13 +267,13 @@ export default {
 
     handleCopyAccount() {
       uni.setClipboardData({
-        data: "06-0193-0903969-00",
+        data: this.accountText,
       });
     },
 
     handleCopyName() {
       uni.setClipboardData({
-        data: "Salessmart Ltd",
+        data: this.nameText,
       });
     },
 

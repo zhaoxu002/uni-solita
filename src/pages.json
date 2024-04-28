@@ -34,9 +34,9 @@
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "white",
+    "navigationBarTextStyle": "black",
     "backgroundColor": "#fff",
-    "navigationBarBackgroundColor": "#fdabb3"
+    "navigationBarBackgroundColor": "#fff"
   },
   "tabBar": {
     "color": "#313d53",

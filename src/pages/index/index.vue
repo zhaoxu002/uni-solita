@@ -2,7 +2,7 @@
   <div>
     <image
       class="page-bg"
-      src="@/static/head.jpg"
+      src="@/static/head.png"
       mode="aspectFill"
       show-menu-by-longpress
     ></image>
