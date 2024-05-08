@@ -1,23 +1,19 @@
 <template>
   <div>
-    <div v-for="item of orders" :key="item.sn" class="order">
+    <div v-for="(item, index) of orders" :key="item.sn" class="order">
+      <div>#{{ total - index }}</div>
       <div>订单号：{{ item.sn }}</div>
-      <div>
-        用户昵称：{{ item.userName }}
-        联系电话： {{ item.userPhone }}
-      </div>
-      <div>
-        下单时间：{{ item.createTime }}
-      </div>
+      <div>用户昵称：{{ item.userName }} 联系电话： {{ item.userPhone }}</div>
+      <div>下单时间：{{ item.createTime }}</div>
       <div class="wrap">
-        {{ item.items }}
+        <div v-for="orderItem of item.orderItems" :key="orderItem._id">
+          <span>{{ orderItem.itemName }}</span
+          >&nbsp;*&nbsp;
+          <span>{{ orderItem.itemQuantity }}</span>
+        </div>
       </div>
-      <div>
-        总金额：{{ item.totalAmount }}
-      </div>
-      <div>
-        备注：{{ item.note }}
-      </div>
+      <div>总金额：{{ item.totalAmount }}</div>
+      <div>备注：{{ item.note }}</div>
     </div>
   </div>
 </template>
@@ -43,7 +39,7 @@ export default {
   },
 
   onReachBottom() {
-    this.fitch();
+    this.fetch();
   },
 
   onPullDownRefresh() {
@@ -56,7 +52,8 @@ export default {
   methods: {
     fetch() {
       const id = this.id;
-      if (this.loadingStatus === "loading") return;
+      if (this.loadingStatus === "loading" || this.loadingStatus === "noMore")
+        return;
 
       this.loadingStatus = "loading";
 
@@ -75,7 +72,7 @@ export default {
         .then((res) => {
           if (res.result.success) {
             console.log(res);
-            const data = res.result.data.map((item) => {
+            const data = res.result.data.data.map((item) => {
               return {
                 ...item,
                 createTime: dayjs(item.createTime).format(
@@ -91,7 +88,7 @@ export default {
           } else {
             this.loadingStatus = "more";
           }
-
+          this.total = res.result.data.total;
           this.current += 1;
         })
         .catch(() => {

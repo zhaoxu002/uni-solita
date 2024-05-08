@@ -38,21 +38,21 @@ const searchPurchaseById = async (event, context) => {
         foreignField: "_id",
         as: "locations",
       })
-      .lookup({
-        from: "orderItem",
-        localField: "_id",
-        foreignField: "activityId",
-        as: "orderList",
-      })
-      .lookup({
-        from: "order",
-        localField: "_id",
-        foreignField: "purchaseId",
-        as: "orders",
-      })
+      // .lookup({
+      //   from: "orderItem",
+      //   localField: "_id",
+      //   foreignField: "activityId",
+      //   as: "orderList",
+      // })
+      // .lookup({
+      //   from: "order",
+      //   localField: "_id",
+      //   foreignField: "purchaseId",
+      //   as: "orders",
+      // })
       .end();
     const [item] = list;
-    const { items, orders, orderList, locations, ...rest } = item;
+    const { items, locations, ...rest } = item;
 
     // sort item
     const sortedItems = items.sort((a, b) => {
@@ -65,19 +65,19 @@ const searchPurchaseById = async (event, context) => {
     // TODO: optimize limit
     const res = {
       ...rest,
-      orderList: orderList
-        .map((orderItem) => {
-          const { orderSn } = orderItem;
-          let order = orders.find((order) => order.sn === orderSn);
-          return {
-            ...orderItem,
-            ...order,
-          };
-        })
-        .sort((a, b) => {
-          return b.createTime - a.createTime;
-        })
-        .slice(0, 3),
+      // orderList: orderList
+      //   .map((orderItem) => {
+      //     const { orderSn } = orderItem;
+      //     let order = orders.find((order) => order.sn === orderSn);
+      //     return {
+      //       ...orderItem,
+      //       ...order,
+      //     };
+      //   })
+      //   .sort((a, b) => {
+      //     return b.createTime - a.createTime;
+      //   })
+      //   .slice(0, 3),
       locations: locations.sort((a, b) => {
         return a.description.localeCompare(b.description, "zh");
       }),

@@ -45,7 +45,12 @@
       >
         重置商品默认库存
       </button>
-      <button v-if="isAdmin" class="order-btn" size="mini" @click="handleCheckOrders">
+      <button
+        v-if="isAdmin"
+        class="order-btn"
+        size="mini"
+        @click="handleCheckOrders"
+      >
         查看订单信息
       </button>
     </div>
@@ -110,14 +115,23 @@
       </div>
 
       <div class="record-container">
-        <div v-for="order of records" :key="order._id" class="order">
+        <div v-for="(order, index) of records" :key="order._id" class="order">
           <div>
-            <span :style="{ marginRight: '4px' }">{{ order.userName }}</span>
+            <span>#{{ totalOrders - index }}</span>
+            <span :style="{ marginRight: '4px', marginLeft: '4px' }">{{
+              order.userName
+            }}</span>
             <span> {{ order.createTimeFromNow }}购买了</span>
           </div>
-          <div class="line">
-            <div class="ellipsis">{{ order.itemName }}</div>
-            <div>&nbsp;+{{ order.itemQuantity }}</div>
+          <div>
+            <div
+              v-for="orderItem of order.orderItems"
+              :key="orderItem._id"
+              class="line"
+            >
+              <div class="ellipsis">{{ orderItem.itemName }}</div>
+              <div>&nbsp;+{{ orderItem.itemQuantity }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -277,6 +291,11 @@ export default {
 
       categories: defaultCategories,
       currentCategory: 0,
+
+      currentPage: 1,
+      pageSize: 20,
+      totalOrders: 0,
+      loadingStatus: "more",
     };
   },
 
@@ -359,7 +378,10 @@ export default {
   /**
    * 页面上拉触底事件的处理函数
    */
-  onReachBottom() {},
+  onReachBottom() {
+    console.log("reach bottom");
+    this.fetchOrders();
+  },
   /**
    * 用户点击右上角分享
    */
@@ -409,7 +431,7 @@ export default {
         locations,
         startTime,
         endTime,
-        orderList,
+        // orderList,
         headImages,
         nanoId,
         _id,
@@ -432,19 +454,19 @@ export default {
         };
       });
 
-      this.records = orderList.map((order) => {
-        return {
-          ...order,
-          createTimeFromNow: dayjs(order.createTime).fromNow(),
-          userName: order.userName
-            .split("")
-            .map((s, index, arr) => {
-              if (index === arr.length - 1) return s;
-              return "*";
-            })
-            .join(""),
-        };
-      });
+      // this.records = orderList.map((order) => {
+      //   return {
+      //     ...order,
+      //     createTimeFromNow: dayjs(order.createTime).fromNow(),
+      //     userName: order.userName
+      //       .split("")
+      //       .map((s, index, arr) => {
+      //         if (index === arr.length - 1) return s;
+      //         return "*";
+      //       })
+      //       .join(""),
+      //   };
+      // });
       this.headImages = headImages;
       store.commit("updateLocationList", locations);
 
@@ -455,6 +477,64 @@ export default {
       );
 
       this.categories = categories;
+
+      this.fetchOrders();
+    },
+
+    fetchOrders() {
+      const id = this.activityId;
+
+      if (this.loadingStatus === "loading" || this.loadingStatus === "noMore")
+        return;
+      this.loadingStatus = "loading";
+
+      wx.cloud
+        .callFunction({
+          name: "order",
+          data: {
+            method: "searchOrdersByPurchaseId",
+            id: id,
+            pageQuery: {
+              curPage: this.currentPage,
+              limit: this.pageSize,
+            },
+          },
+        })
+        .then((res) => {
+          if (res.result.success) {
+            const records = res.result.data.data.map((order) => {
+              return {
+                ...order,
+                createTimeFromNow: dayjs(order.createTime).fromNow(),
+
+                userName: order.userName
+                  .split("")
+                  .map((s, index, arr) => {
+                    if (index === arr.length - 1) return s;
+                    return "*";
+                  })
+                  .join(""),
+              };
+            });
+
+            this.records = this.records.concat(records);
+            this.totalOrders = res.result.data.total;
+
+            if (res.result.data.data.length < this.pageSize) {
+              this.loadingStatus = "noMore";
+            } else {
+              this.loadingStatus = "more";
+            }
+
+            this.currentPage += 1;
+          }
+        })
+        .catch(() => {
+          this.loadingStatus = "noMore";
+        })
+        .finally(() => {
+          uni.stopPullDownRefresh();
+        });
     },
 
     onSelectCategory(e) {
@@ -782,8 +862,8 @@ $price: #f5222d;
 
   .order-btn {
     position: absolute;
-    bottom: 96px;
-    right: 216px;
+    bottom: 128px;
+    right: 100px;
   }
 
   .head-img {
