@@ -56,7 +56,7 @@
     </div>
 
     <div class="container">
-      <div class="info-container">
+      <div class="info-container" v-if="activityId">
         <div class="title">{{ title }}</div>
         <div class="status" v-if="isActivityEnd">
           {{ formatStartTime }} 开始

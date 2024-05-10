@@ -476,13 +476,13 @@ const exportOrdersByPurchaseId = async (event, context) => {
 };
 
 const searchOrdersByPurchaseId = async (event) => {
-  const { purchaseId, pageQuery: { curPage = 1, limit = 10 } = {} } = event;
+  const { id, pageQuery: { curPage = 1, limit = 10 } = {} } = event;
 
   const [{ list }, { total }] = await Promise.all([
     orderCollection
       .aggregate()
       .match({
-        purchaseId: purchaseId,
+        purchaseId: id,
         isDelete: _.not(_.eq(true)),
         status: _.not(_.eq(5)),
       })
@@ -501,7 +501,7 @@ const searchOrdersByPurchaseId = async (event) => {
 
     orderCollection
       .where({
-        purchaseId: purchaseId,
+        purchaseId: id,
         isDelete: _.not(_.eq(true)),
         status: _.not(_.eq(5)),
       })
