@@ -23,6 +23,7 @@
             <span @click="edit(item._id)">编辑</span>
             <span @click="copy(item)">复制</span>
             <span @click="toggle(item)">{{ item.isDelete ? "展示" : "隐藏" }}</span>
+            <span v-if="canDelete(item)" class="danger" @click="deletePurchase(item)">彻底删除</span>
           </div>
         </div>
       </div>
@@ -67,16 +68,7 @@ export default {
   methods: {
     async reset() {
       this.activities = []; this.current = 1; this.loadingStatus = "more"; this.now = Date.now();
-      // #ifdef H5
-      this.activities = [
-        { _id: "preview-1", title: "新西兰牛腩团购", startTime: dayjs().subtract(1, "day").valueOf(), endTime: dayjs().add(1, "hour").valueOf(), orderCount: 23, itemIds: ["1", "2", "3"], headImages: ["/static/cardbg.jpg"], isDelete: false },
-        { _id: "preview-2", title: "阳光玫瑰葡萄团购", startTime: dayjs().subtract(2, "hour").valueOf(), endTime: dayjs().add(2, "hour").valueOf(), orderCount: 36, itemIds: ["4", "5"], headImages: ["/static/head.jpg"], isDelete: false },
-        { _id: "preview-3", title: "鲜活大闸蟹团购", startTime: dayjs().add(1, "day").valueOf(), endTime: dayjs().add(4, "day").valueOf(), orderCount: 0, itemIds: ["6"], headImages: ["/static/cardbg.jpg"], isDelete: false },
-      ];
-      this.loadingStatus = "noMore";
-      uni.stopPullDownRefresh();
-      return;
-      // #endif
+
       const adminRes = await wx.cloud.callFunction({ name: "checkIsAdmin" });
       if (!adminRes.result.isAdmin) {
         uni.showToast({ title: "无管理员权限", icon: "none" });
@@ -112,6 +104,11 @@ export default {
       return "active";
     },
     statusLabel(item) { return { active: "进行中", upcoming: "待开始", ended: "已结束", hidden: "已隐藏" }[this.statusOf(item)]; },
+    canDelete(item) {
+      const status = this.statusOf(item);
+      const canDeleteByStatus = status === "hidden" || status === "upcoming" || status === "ended";
+      return Number(item.orderCount || 0) === 0 && canDeleteByStatus;
+    },
     formatTime(time) { return dayjs(time).format("M月D日 HH:mm"); },
     openDetail(id) { uni.navigateTo({ url: `/pages/activity/index?id=${id}` }); },
     edit(id) { uni.navigateTo({ url: `/pages/edit/index?id=${id}` }); },
@@ -128,6 +125,32 @@ export default {
           if (!action.confirm) return;
           const res = await wx.cloud.callFunction({ name: "purchase", data: { method: "updateOne", _id: item._id, data: { isDelete: !willShow } } });
           if (res.result.success) { uni.showToast({ title: willShow ? "已展示" : "已隐藏" }); this.reset(); }
+        },
+      });
+    },
+    deletePurchase(item) {
+      if (!this.canDelete(item)) {
+        uni.showToast({ title: "仅可删除无订单且已隐藏、未开始或已结束的接龙", icon: "none" });
+        return;
+      }
+      uni.showModal({
+        title: "彻底删除接龙？",
+        content: "删除后无法恢复，请确认该接龙不再需要。",
+        confirmText: "彻底删除",
+        confirmColor: "#e34d59",
+        success: async (action) => {
+          if (!action.confirm) return;
+          try {
+            const res = await wx.cloud.callFunction({
+              name: "purchase",
+              data: { method: "deleteOne", _id: item._id },
+            });
+            if (!res.result.success) throw new Error("删除失败");
+            this.activities = this.activities.filter((activity) => activity._id !== item._id);
+            uni.showToast({ title: "已彻底删除" });
+          } catch (error) {
+            uni.showToast({ title: "删除失败，请刷新后重试", icon: "none" });
+          }
         },
       });
     },
@@ -155,5 +178,6 @@ export default {
 .numbers { display: flex; gap: 24px; color: #7c8798; font-size: 11px; margin-top: 10px; }
 .numbers strong { color: #172033; font-size: 16px; }
 .actions { height: 44px; margin-top: 11px; border-top: 1px solid #edf0f4; display: flex; justify-content: flex-end; align-items: center; gap: 22px; color: #4d586b; font-size: 12px; }
+.actions .danger { color: #e34d59; }
 .empty { padding: 70px 16px; text-align: center; color: #8b95a7; font-size: 14px; }
 </style>

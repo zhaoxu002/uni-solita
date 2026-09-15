@@ -252,6 +252,35 @@ const removePurchaseById = async (event, context) => {
   }
 };
 
+const deletePurchaseById = async (event, context) => {
+  const { _id } = event;
+  try {
+    await assertAdmin();
+    const purchase = await daoUtils.getOne(collection, _id);
+    const now = Date.now();
+    const canDeleteByStatus = purchase.isDelete === true
+      || purchase.startTime > now
+      || purchase.endTime <= now;
+
+    if (!canDeleteByStatus) {
+      throw new Error("进行中的接龙不能彻底删除");
+    }
+
+    const { total } = await db.collection("order").where({
+      purchaseId: _id,
+      status: _.not(_.eq(5)),
+    }).count();
+    if (total !== 0) {
+      throw new Error("有订单的接龙不能彻底删除");
+    }
+
+    await daoUtils.deleteOne(collection, _id);
+    return createSuccessResponse();
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
 const copyPurchaseById = async (event) => {
   const { id } = event;
   try {
@@ -362,6 +391,7 @@ module.exports = {
   searchPurchaseByPage,
   searchPurchaseByNanoId,
   removePurchaseById,
+  deletePurchaseById,
   copyPurchaseById,
   createPurchase,
   modifyPurchase,

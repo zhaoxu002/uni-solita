@@ -74,16 +74,7 @@ export default {
   methods: {
     async load() {
       this.loading = true;
-      // #ifdef H5
-      this.items = [
-        { _id: "preview-1", title: "新西兰牛腩", price: 16.9, stock: 2, defaultStock: 50, status: 1, defaultImg: "/static/cardbg.jpg" },
-        { _id: "preview-2", title: "阳光玫瑰葡萄", price: 12.5, stock: 36, defaultStock: 100, status: 1, defaultImg: "/static/head.jpg" },
-        { _id: "preview-3", title: "鲜活大闸蟹", price: 28, stock: 0, defaultStock: 80, status: 0, defaultImg: "/static/cardbg.jpg" },
-      ];
-      this.loading = false;
-      uni.stopPullDownRefresh();
-      return;
-      // #endif
+
       try {
         const adminRes = await wx.cloud.callFunction({ name: "checkIsAdmin" });
         if (!adminRes.result.isAdmin) {

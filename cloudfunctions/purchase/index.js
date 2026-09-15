@@ -8,7 +8,8 @@ const {
   copyPurchaseById,
   batchAddNanoId,
   searchAllByPage,
-  searchAdminPurchaseById
+  searchAdminPurchaseById,
+  deletePurchaseById,
 } = require("./controller");
 
 exports.main = async (event, context) => {
@@ -21,6 +22,8 @@ exports.main = async (event, context) => {
       return await searchPurchaseByNanoId(event, context);
     case "removeOne":
       return await removePurchaseById(event, context);
+    case "deleteOne":
+      return await deletePurchaseById(event, context);
     case "createOne":
       return await createPurchase(event, context);
     case "updateOne":

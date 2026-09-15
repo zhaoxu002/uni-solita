@@ -123,19 +123,7 @@ export default {
     async load() {
       this.loading = true;
       this.now = Date.now();
-      // #ifdef H5
-      this.isAdmin = true;
-      this.activities = [
-        { _id: "preview-1", title: "新西兰牛腩团购", startTime: dayjs().subtract(1, "day").valueOf(), endTime: dayjs().add(1, "hour").valueOf(), orderCount: 23, itemIds: ["1", "2", "3"], headImages: ["/static/cardbg.jpg"], isDelete: false },
-        { _id: "preview-2", title: "阳光玫瑰葡萄团购", startTime: dayjs().subtract(2, "hour").valueOf(), endTime: dayjs().hour(22).minute(0).valueOf(), orderCount: 36, itemIds: ["4", "5"], headImages: ["/static/head.jpg"], isDelete: false },
-        { _id: "preview-3", title: "鲜活大闸蟹团购", startTime: dayjs().add(1, "day").hour(10).minute(0).valueOf(), endTime: dayjs().add(4, "day").valueOf(), orderCount: 0, itemIds: ["6"], headImages: ["/static/cardbg.jpg"], isDelete: false },
-      ];
-      this.purchaseTotal = 3;
-      this.items = [{ stock: 2, status: 1 }, { stock: 4, status: 1 }, { stock: 20, status: 1 }];
-      this.loading = false;
-      uni.stopPullDownRefresh();
-      return;
-      // #endif
+
       try {
         const adminRes = await wx.cloud.callFunction({ name: "checkIsAdmin" });
         this.isAdmin = adminRes.result.isAdmin;

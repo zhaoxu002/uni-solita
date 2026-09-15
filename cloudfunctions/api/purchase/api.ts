@@ -25,12 +25,25 @@ wx.cloud
     console.log(res);
   });
 
-// 根据id删除团购
+// 根据id隐藏团购
 wx.cloud
   .callFunction({
     name: 'purchase',
     data: {
       method: 'removeOne',
+      _id: '2cc84e26640624f4033208a8355115ed',
+    },
+  })
+  .then((res) => {
+    console.log(res);
+  });
+
+// 根据id彻底删除无有效订单且已隐藏、未开始或已结束的团购（仅管理员）
+wx.cloud
+  .callFunction({
+    name: 'purchase',
+    data: {
+      method: 'deleteOne',
       _id: '2cc84e26640624f4033208a8355115ed',
     },
   })
