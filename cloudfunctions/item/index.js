@@ -6,6 +6,8 @@ const {
   stopSellItem,
   startSellItem,
   reloadStock,
+  modifyItem,
+  searchAdminItemsByPage,
 } = require("./controller");
 
 exports.main = async (event, context) => {
@@ -24,5 +26,9 @@ exports.main = async (event, context) => {
       return await startSellItem(event, context);
     case "reloadStock":
       return await reloadStock(event, context);
+    case "updateOne":
+      return await modifyItem(event, context);
+    case "getAdminListByPage":
+      return await searchAdminItemsByPage(event, context);
   }
 };

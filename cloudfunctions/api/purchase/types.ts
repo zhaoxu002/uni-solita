@@ -8,6 +8,10 @@ interface IOriginPurchase {
   itemIds: string[];
   headImages: string[];
   description: string;
+  descriptionBlocks?: Array<
+    | { type: "text"; content: string }
+    | { type: "image"; url: string }
+  >;
   locationIds: string[];
   isDelete: boolean;
 }

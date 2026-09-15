@@ -1,6 +1,8 @@
 const cloud = require("wx-server-sdk");
 const daoUtils = require("./utils/daoUtil");
 const Purchase = require("./purchaseVo");
+const { assertAdmin } = require("./utils/adminUtil");
+const { normalizeDescriptionBlocks, descriptionBlocksToHtml } = require("./utils/descriptionUtil");
 const {
   createSuccessResponse,
   createErrorResponse,
@@ -17,7 +19,7 @@ const db = cloud.database();
 const _ = db.command;
 const collection = db.collection("purchase");
 
-const searchPurchaseById = async (event, context) => {
+const searchPurchaseById = async (event, context, includeUnavailable = false) => {
   const { _id } = event;
   try {
     const { list } = await collection
@@ -79,12 +81,23 @@ const searchPurchaseById = async (event, context) => {
       locations: locations.sort((a, b) => {
         return a.description.localeCompare(b.description, "zh");
       }),
-      items: sortedItems.filter(i => {
-        return i.stock > 0
-      })
+      items: includeUnavailable
+        ? sortedItems
+        : sortedItems.filter(i => {
+            return i.stock > 0
+          })
     };
 
     return createSuccessResponse(res);
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
+const searchAdminPurchaseById = async (event, context) => {
+  try {
+    await assertAdmin();
+    return await searchPurchaseById(event, context, true);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -185,6 +198,7 @@ const searchAllByPage = async (event, context) => {
     pageQuery: { curPage, limit },
   } = event;
   try {
+    await assertAdmin();
     const [{ list }, { total }] = await Promise.all([
       collection
         .aggregate()
@@ -196,6 +210,12 @@ const searchAllByPage = async (event, context) => {
         })
         .skip((curPage - 1) * limit)
         .limit(limit)
+        .lookup({
+          from: "order",
+          localField: "_id",
+          foreignField: "purchaseId",
+          as: "orders",
+        })
         .end(),
 
       collection
@@ -206,10 +226,11 @@ const searchAllByPage = async (event, context) => {
     ]);
 
     const res = list.map((item) => {
-      const { ...rest } = item;
+      const { orders = [], ...rest } = item;
 
       return {
         ...rest,
+        orderCount: orders.filter((order) => order.status !== 5).length,
       };
     });
 
@@ -223,6 +244,7 @@ const searchAllByPage = async (event, context) => {
 const removePurchaseById = async (event, context) => {
   const { _id } = event;
   try {
+    await assertAdmin();
     await daoUtils.removeOne(collection, _id);
     return createSuccessResponse();
   } catch (error) {
@@ -233,6 +255,7 @@ const removePurchaseById = async (event, context) => {
 const copyPurchaseById = async (event) => {
   const { id } = event;
   try {
+    await assertAdmin();
     const activity = await daoUtils.getOne(collection, id);
     console.log("activity", activity);
     const {
@@ -262,10 +285,16 @@ const copyPurchaseById = async (event) => {
 
 const createPurchase = async (event, context) => {
   const { data } = event;
-  const vo = new Purchase(data);
   try {
-    daoUtils.createOne(collection, vo);
-    return createSuccessResponse();
+    await assertAdmin();
+    const purchaseData = { ...data };
+    if (Object.prototype.hasOwnProperty.call(data || {}, "descriptionBlocks")) {
+      purchaseData.descriptionBlocks = normalizeDescriptionBlocks(data.descriptionBlocks);
+      purchaseData.description = descriptionBlocksToHtml(purchaseData.descriptionBlocks);
+    }
+    const vo = new Purchase(purchaseData);
+    const result = await daoUtils.createOne(collection, vo);
+    return createSuccessResponse(result);
   } catch (error) {
     return createErrorResponse(error);
   }
@@ -273,8 +302,31 @@ const createPurchase = async (event, context) => {
 
 const modifyPurchase = async (event, context) => {
   const { _id, data } = event;
+  const allowedFields = [
+    "title",
+    "startTime",
+    "endTime",
+    "deliveryTime",
+    "itemIds",
+    "headImages",
+    "description",
+    "descriptionBlocks",
+    "locationIds",
+    "isDelete",
+  ];
+  const update = allowedFields.reduce((result, key) => {
+    if (Object.prototype.hasOwnProperty.call(data || {}, key)) {
+      result[key] = data[key];
+    }
+    return result;
+  }, {});
+  if (Object.prototype.hasOwnProperty.call(data || {}, "descriptionBlocks")) {
+    update.descriptionBlocks = normalizeDescriptionBlocks(data.descriptionBlocks);
+    update.description = descriptionBlocksToHtml(update.descriptionBlocks);
+  }
   try {
-    await daoUtils.updateOne(collection, _id, data);
+    await assertAdmin();
+    await daoUtils.updateOne(collection, _id, update);
     return createSuccessResponse();
   } catch (error) {
     return createErrorResponse(error);
@@ -283,6 +335,7 @@ const modifyPurchase = async (event, context) => {
 
 const batchAddNanoId = async () => {
   try {
+    await assertAdmin();
     const result = await db.runTransaction(async (transacation) => {
       try {
         const collection = transacation.collection('purchase')
@@ -313,5 +366,6 @@ module.exports = {
   createPurchase,
   modifyPurchase,
   batchAddNanoId,
-  searchAllByPage
+  searchAllByPage,
+  searchAdminPurchaseById,
 };

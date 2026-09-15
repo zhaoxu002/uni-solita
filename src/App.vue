@@ -4,6 +4,9 @@ export default Vue.extend({
   mpType: "app",
   onLaunch() {
     console.log("App Launch");
+    // #ifdef H5
+    return;
+    // #endif
     if (!wx.cloud) {
       console.error("请使用 2.2.3 或以上的基础库以使用云能力");
     } else {

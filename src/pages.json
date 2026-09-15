@@ -37,6 +37,26 @@
       "style": {
         "navigationBarTitleText": "全部接龙"
       }
+    },
+    {
+      "path": "pages/admin/index",
+      "style": {
+        "navigationBarTitleText": "管理中心",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/admin/items/index",
+      "style": {
+        "navigationBarTitleText": "商品管理",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/admin/item-edit/index",
+      "style": {
+        "navigationBarTitleText": "编辑商品"
+      }
     }
   ],
   "globalStyle": {

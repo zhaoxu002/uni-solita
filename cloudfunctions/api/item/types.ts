@@ -20,10 +20,17 @@ interface IOriginItem {
   defaultImg: string;
   // 商品描述(富文本)
   description: string;
+  descriptionBlocks?: Array<
+    | { type: "text"; content: string }
+    | { type: "image"; url: string }
+  >;
   // 实际价格
   price: number;
   // 库存
   stock: number;
+  defaultStock?: number;
+  recommend?: boolean;
+  displayOrder?: number;
   // 商品状态
   status?: ItemStatus;
 }

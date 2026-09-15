@@ -36,7 +36,7 @@
       </div>
 
       <div class="row" v-if="isAdmin">
-        <button class="contact" @click="handleCheckAllActivities">查看全部接龙</button>
+        <button class="contact" @click="handleOpenAdmin">进入管理中心</button>
       </div>
     </div>
     <div class="activity-list">
@@ -380,6 +380,11 @@ export default {
     handleCheckAllActivities() {
       uni.navigateTo({
         url: "/pages/list/index",
+      });
+    },
+    handleOpenAdmin() {
+      uni.navigateTo({
+        url: "/pages/admin/index",
       });
     },
   },

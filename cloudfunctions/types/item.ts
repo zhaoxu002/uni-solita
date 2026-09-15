@@ -22,14 +22,25 @@ interface IItem {
   defaultImg: string;
   // 商品描述(富文本)
   description: string;
+  // 后台轻量内容编辑器的结构化数据
+  descriptionBlocks?: Array<
+    | { type: "text"; content: string }
+    | { type: "image"; url: string }
+  >;
   // 实际价格
   price: number;
   // 库存
   stock: number;
+  // 重置库存时使用的默认值
+  defaultStock?: number;
   // 商品状态
   status: ItemStatus;
   // 销量
   saleCount: number;
+  // 接龙内是否优先展示
+  recommend?: boolean;
+  // 数字越小越靠前
+  displayOrder?: number;
   // 是否被删除
   isDelete: boolean;
 }

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build:mp-weixin": "cross-env NODE_ENV=production UNI_PLATFORM=mp-weixin UNI_OUTPUT_DIR=dist/build/mp-weixin vue-cli-service uni-build",
+    "build:h5": "cross-env NODE_ENV=production UNI_PLATFORM=h5 UNI_OUTPUT_DIR=dist/build/h5 vue-cli-service uni-build",
     "dev:mp-weixin": "cross-env NODE_ENV=development UNI_PLATFORM=mp-weixin UNI_OUTPUT_DIR=dist/build/mp-weixin vue-cli-service uni-build --watch",
     "info": "node node_modules/@dcloudio/vue-cli-plugin-uni/commands/info.js",
     "serve:quickapp-native": "node node_modules/@dcloudio/uni-quickapp-native/bin/serve.js",

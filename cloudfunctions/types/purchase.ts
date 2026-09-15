@@ -18,6 +18,11 @@ interface IPurchase {
   headImages: string[];
   // 商品描述(富文本)
   description: string;
+  // 手机端轻量图文编辑器的数据源
+  descriptionBlocks?: Array<
+    | { type: "text"; content: string }
+    | { type: "image"; url: string }
+  >;
   // 提货点ids
   locationIds: string[];
   // 是否被删除
